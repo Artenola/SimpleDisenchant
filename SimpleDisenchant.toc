@@ -1,0 +1,9 @@
+## Interface: 120000
+## Title: Simple Disenchant
+## Notes: Easily disenchant items from your bags with a simple interface
+## Notes-frFR: Désenchantez facilement les objets de vos sacs
+## Author: Arté
+## Version: 1.0.0
+## SavedVariables: SimpleDisenchantDB
+
+SimpleDisenchant.lua
