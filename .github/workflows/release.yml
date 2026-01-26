@@ -1,0 +1,42 @@
+name: Package and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - develop
+      - 'feature/**'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set release type
+        id: release_type
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "type=release" >> $GITHUB_OUTPUT
+            echo "args=" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "type=beta" >> $GITHUB_OUTPUT
+            echo "args=-z" >> $GITHUB_OUTPUT
+          else
+            echo "type=alpha" >> $GITHUB_OUTPUT
+            echo "args=-z" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Package and Release
+        uses: BigWigsMods/packager@v2
+        with:
+          args: ${{ steps.release_type.outputs.args }}
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGER_RELEASE_TYPE: ${{ steps.release_type.outputs.type }}

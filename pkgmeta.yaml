@@ -1,0 +1,15 @@
+package-as: SimpleDisenchant
+
+enable-nolib-creation: no
+
+ignore:
+  - .git
+  - .gitignore
+  - .claude
+  - "*.md"
+  - pkgmeta.yaml
+  - "*.zip"
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
