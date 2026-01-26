@@ -20,13 +20,15 @@ jobs:
       - name: Set release type
         id: release_type
         run: |
+          args="-m pkgmeta.yaml"
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "args=" >> $GITHUB_OUTPUT
+            echo "No args for stable release"
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "args=-r beta" >> $GITHUB_OUTPUT
+            args="${args} -n {package-name}-{project-version}{beta}{nolib}{classic}:{project-version}{beta}{classic}{nolib}"
           else
-            echo "args=-r alpha" >> $GITHUB_OUTPUT
+            args="${args} -n a{package-name}-{project-version}{alpha}{nolib}{classic}:{project-version}{alpha}{classic}{nolib}"
           fi
+          echo $args >> $GITHUB_OUTPUT
 
       - name: Package and Release
         uses: BigWigsMods/packager@v2
