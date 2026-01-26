@@ -40,4 +40,4 @@ Type `/sde` to open/close the SimpleDisenchant window.
 
 ## License
 
-MIT License - Feel free to use and modify as you wish.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
