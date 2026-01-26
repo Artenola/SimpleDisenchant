@@ -2,8 +2,17 @@
 ## Title: Simple Disenchant
 ## Notes: Easily disenchant items from your bags with a simple interface
 ## Notes-frFR: Désenchantez facilement les objets de vos sacs
+## Notes-deDE: Entzaubern Sie einfach Gegenstände aus Ihren Taschen
+## Notes-esES: Desencanta fácilmente objetos de tus bolsas
+## Notes-itIT: Disincanta facilmente gli oggetti dalle tue borse
+## Notes-ruRU: Легко распыляйте предметы из сумок
 ## Author: Arté
 ## Version: 1.0.0
 ## SavedVariables: SimpleDisenchantDB
+## X-Category: Professions
+## X-Website: https://github.com/Artenola/SimpleDisenchant
+## X-Curse-Project-ID:
+## X-Wago-ID:
+## X-WoWI-ID:
 
 SimpleDisenchant.lua
