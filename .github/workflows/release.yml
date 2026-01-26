@@ -20,7 +20,7 @@ jobs:
       - name: Set release type
         id: release_type
         run: |
-          args="-m pkgmeta.yaml"
+          args=""
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             echo "No args for stable release"
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
