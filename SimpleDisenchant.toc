@@ -14,8 +14,8 @@
 ## Category: Professions
 ## X-Category: Professions
 ## X-Website: https://github.com/Artenola/SimpleDisenchant
-## X-Curse-Project-ID:
-## X-Wago-ID:
+## X-Curse-Project-ID: 1445028
+## X-Wago-ID: QKy9q4K7
 ## X-WoWI-ID:
 
 SimpleDisenchant.lua
