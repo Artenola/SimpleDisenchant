@@ -8,7 +8,7 @@
 ## Notes-ruRU: Легко распыляйте предметы из сумок
 ## Author: Arté
 ## Version: 1.0.0
-## IconTexture: Interface\Icons\INV_Enchant_Disenchant
+## IconTexture: Interface\AddOns\SimpleDisenchant\media\SimpleDisenchant_400_400
 ## AddonCompartmentFunc: SimpleDisenchant_OnAddonCompartmentClick
 ## SavedVariables: SimpleDisenchantDB
 ## Category: Professions

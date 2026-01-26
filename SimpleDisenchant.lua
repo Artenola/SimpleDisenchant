@@ -455,7 +455,7 @@ local function CreateProfessionButton()
 
     professionButton = CreateFrame("Button", "SimpleDisenchantProfessionButton", ProfessionsFrame)
     professionButton:SetSize(44, 44)
-    professionButton:SetPoint("TOPRIGHT", ProfessionsFrame, "TOPRIGHT", -60, -5)
+    professionButton:SetPoint("LEFT", ProfessionsFrame.CraftingPage.ConcentrationDisplay, "RIGHT", 0, 0)
     professionButton:RegisterForDrag("LeftButton")
     professionButton:RegisterForClicks("LeftButtonUp")
 
@@ -463,7 +463,7 @@ local function CreateProfessionButton()
     professionButton.icon = professionButton:CreateTexture(nil, "ARTWORK")
     professionButton.icon:SetSize(36, 36)
     professionButton.icon:SetPoint("CENTER")
-    professionButton.icon:SetTexture("Interface\\Icons\\INV_Enchant_Disenchant")
+    professionButton.icon:SetTexture("Interface\\AddOns\\SimpleDisenchant\\media\\SimpleDisenchant_400_400")
 
     -- Bordure
     professionButton.border = professionButton:CreateTexture(nil, "OVERLAY")
