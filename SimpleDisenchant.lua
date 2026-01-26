@@ -16,7 +16,7 @@ L["enUS"] = {
     QUALITY_BLUE = "Blue",
     QUALITY_PURPLE = "Purple",
     LOADED_MSG = "/sde to open",
-    DRAG_TO_ACTIONBAR = "Right-click: Drag to action bar",
+    DRAG_TO_ACTIONBAR = "Drag to action bar",
 }
 L["enGB"] = L["enUS"]
 
@@ -31,7 +31,7 @@ L["frFR"] = {
     QUALITY_BLUE = "Bleu",
     QUALITY_PURPLE = "Violet",
     LOADED_MSG = "/sde pour ouvrir",
-    DRAG_TO_ACTIONBAR = "Clic droit: Glisser vers la barre d'action",
+    DRAG_TO_ACTIONBAR = "Glisser vers la barre d'action",
 }
 
 -- German
@@ -45,7 +45,7 @@ L["deDE"] = {
     QUALITY_BLUE = "Blau",
     QUALITY_PURPLE = "Lila",
     LOADED_MSG = "/sde zum Öffnen",
-    DRAG_TO_ACTIONBAR = "Rechtsklick: Zur Aktionsleiste ziehen",
+    DRAG_TO_ACTIONBAR = "Zur Aktionsleiste ziehen",
 }
 
 -- Spanish (EU + Latin America)
@@ -59,7 +59,7 @@ L["esES"] = {
     QUALITY_BLUE = "Azul",
     QUALITY_PURPLE = "Morado",
     LOADED_MSG = "/sde para abrir",
-    DRAG_TO_ACTIONBAR = "Clic derecho: Arrastrar a barra de acción",
+    DRAG_TO_ACTIONBAR = "Arrastrar a barra de acción",
 }
 L["esMX"] = L["esES"]
 
@@ -74,7 +74,7 @@ L["itIT"] = {
     QUALITY_BLUE = "Blu",
     QUALITY_PURPLE = "Viola",
     LOADED_MSG = "/sde per aprire",
-    DRAG_TO_ACTIONBAR = "Clic destro: Trascina sulla barra azioni",
+    DRAG_TO_ACTIONBAR = "Trascina sulla barra azioni",
 }
 
 -- Russian
@@ -88,7 +88,7 @@ L["ruRU"] = {
     QUALITY_BLUE = "Синий",
     QUALITY_PURPLE = "Фиол.",
     LOADED_MSG = "/sde открыть",
-    DRAG_TO_ACTIONBAR = "ПКМ: Перетащить на панель действий",
+    DRAG_TO_ACTIONBAR = "Перетащить на панель действий",
 }
 
 -- Select locale (fallback to enUS)
@@ -444,6 +444,7 @@ end
 -- ============================================
 -- Bouton dans le grimoire des professions (Enchantement)
 -- ============================================
+local DISENCHANT_SPELL_ID = 13262 -- ID du sort Désenchantement
 local professionButton = nil
 
 local function CreateProfessionButton()
@@ -452,11 +453,32 @@ local function CreateProfessionButton()
     -- Vérifier que ProfessionsFrame existe
     if not ProfessionsFrame then return end
 
-    professionButton = CreateFrame("Button", "SimpleDisenchantProfessionButton", ProfessionsFrame, "UIPanelButtonTemplate")
-    professionButton:SetSize(140, 25)
-    professionButton:SetPoint("TOPRIGHT", ProfessionsFrame, "TOPRIGHT", -60, -30)
-    professionButton:SetText(currentL.TITLE)
+    professionButton = CreateFrame("Button", "SimpleDisenchantProfessionButton", ProfessionsFrame)
+    professionButton:SetSize(44, 44)
+    professionButton:SetPoint("TOPRIGHT", ProfessionsFrame, "TOPRIGHT", -60, -5)
+    professionButton:RegisterForDrag("LeftButton")
+    professionButton:RegisterForClicks("LeftButtonUp")
 
+    -- Icône
+    professionButton.icon = professionButton:CreateTexture(nil, "ARTWORK")
+    professionButton.icon:SetSize(36, 36)
+    professionButton.icon:SetPoint("CENTER")
+    professionButton.icon:SetTexture("Interface\\Icons\\INV_Enchant_Disenchant")
+
+    -- Bordure
+    professionButton.border = professionButton:CreateTexture(nil, "OVERLAY")
+    professionButton.border:SetSize(44, 44)
+    professionButton.border:SetPoint("CENTER")
+    professionButton.border:SetTexture("Interface\\Buttons\\UI-Quickslot2")
+
+    -- Highlight
+    professionButton.highlight = professionButton:CreateTexture(nil, "HIGHLIGHT")
+    professionButton.highlight:SetSize(44, 44)
+    professionButton.highlight:SetPoint("CENTER")
+    professionButton.highlight:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
+    professionButton.highlight:SetBlendMode("ADD")
+
+    -- Clic pour ouvrir SimpleDisenchant
     professionButton:SetScript("OnClick", function()
         if frame:IsShown() then
             frame:Hide()
@@ -466,10 +488,18 @@ local function CreateProfessionButton()
         end
     end)
 
+    -- Drag pour mettre le sort dans la barre d'action
+    professionButton:SetScript("OnDragStart", function()
+        if not InCombatLockdown() then
+            PickupSpell(DISENCHANT_SPELL_ID)
+        end
+    end)
+
     professionButton:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(currentL.TITLE)
         GameTooltip:AddLine(currentL.LOADED_MSG, 1, 1, 1)
+        GameTooltip:AddLine(currentL.DRAG_TO_ACTIONBAR, 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)
     professionButton:SetScript("OnLeave", GameTooltip_Hide)
@@ -509,116 +539,5 @@ else
         end
     end)
 end
-
--- ============================================
--- Bouton draggable pour barre d'action
--- ============================================
-local DISENCHANT_SPELL_ID = 13262 -- ID du sort Désenchantement
-
-local minimapButton = CreateFrame("Button", "SimpleDisenchantMinimapButton", Minimap)
-minimapButton:SetSize(32, 32)
-minimapButton:SetFrameStrata("MEDIUM")
-minimapButton:SetFrameLevel(8)
-minimapButton:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 0, 0)
-minimapButton:SetMovable(true)
-minimapButton:SetClampedToScreen(true)
-minimapButton:RegisterForDrag("LeftButton", "RightButton")
-minimapButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-
--- Icône
-minimapButton.icon = minimapButton:CreateTexture(nil, "BACKGROUND")
-minimapButton.icon:SetSize(20, 20)
-minimapButton.icon:SetPoint("CENTER")
-minimapButton.icon:SetTexture("Interface\\Icons\\INV_Enchant_Disenchant")
-
--- Bordure
-minimapButton.border = minimapButton:CreateTexture(nil, "OVERLAY")
-minimapButton.border:SetSize(54, 54)
-minimapButton.border:SetPoint("CENTER")
-minimapButton.border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-
--- Position autour de la minimap
-local minimapAngle = 220 -- Angle par défaut
-local function UpdateMinimapButtonPosition()
-    local radius = 80
-    local x = math.cos(math.rad(minimapAngle)) * radius
-    local y = math.sin(math.rad(minimapAngle)) * radius
-    minimapButton:ClearAllPoints()
-    minimapButton:SetPoint("CENTER", Minimap, "CENTER", x, y)
-end
-UpdateMinimapButtonPosition()
-
--- Drag autour de la minimap
-minimapButton:SetScript("OnDragStart", function(self, button)
-    if button == "LeftButton" then
-        self:SetScript("OnUpdate", function()
-            local mx, my = Minimap:GetCenter()
-            local cx, cy = GetCursorPosition()
-            local scale = UIParent:GetEffectiveScale()
-            cx, cy = cx / scale, cy / scale
-            minimapAngle = math.deg(math.atan2(cy - my, cx - mx))
-            UpdateMinimapButtonPosition()
-        end)
-    elseif button == "RightButton" then
-        -- Drag pour mettre dans la barre d'action
-        if not InCombatLockdown() then
-            PickupSpell(DISENCHANT_SPELL_ID)
-        end
-    end
-end)
-
-minimapButton:SetScript("OnDragStop", function(self)
-    self:SetScript("OnUpdate", nil)
-    -- Sauvegarder la position si SavedVariables existe
-    if SimpleDisenchantDB then
-        SimpleDisenchantDB.minimapAngle = minimapAngle
-    end
-end)
-
-minimapButton:SetScript("OnClick", function(self, button)
-    if button == "LeftButton" then
-        if frame:IsShown() then
-            frame:Hide()
-        else
-            frame:Show()
-            ScanBags()
-        end
-    elseif button == "RightButton" then
-        -- Drag pour mettre dans la barre d'action
-        if not InCombatLockdown() then
-            PickupSpell(DISENCHANT_SPELL_ID)
-        end
-    end
-end)
-
-minimapButton:SetScript("OnEnter", function(self)
-    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText(currentL.TITLE)
-    GameTooltip:AddLine("|cff00ff00" .. currentL.LOADED_MSG .. "|r")
-    GameTooltip:AddLine("|cffaaaaaa" .. currentL.DRAG_TO_ACTIONBAR .. "|r")
-    GameTooltip:Show()
-end)
-minimapButton:SetScript("OnLeave", GameTooltip_Hide)
-
--- Charger la position sauvegardée
-local function LoadMinimapPosition()
-    if SimpleDisenchantDB and SimpleDisenchantDB.minimapAngle then
-        minimapAngle = SimpleDisenchantDB.minimapAngle
-        UpdateMinimapButtonPosition()
-    end
-end
-
--- Événement pour charger les SavedVariables
-local svLoader = CreateFrame("Frame")
-svLoader:RegisterEvent("ADDON_LOADED")
-svLoader:SetScript("OnEvent", function(self, event, addonName)
-    if addonName == "SimpleDisenchant" then
-        if not SimpleDisenchantDB then
-            SimpleDisenchantDB = {}
-        end
-        LoadMinimapPosition()
-        self:UnregisterEvent("ADDON_LOADED")
-    end
-end)
 
 print("|cffFFD700[SimpleDisenchant]|r " .. currentL.LOADED_MSG)
