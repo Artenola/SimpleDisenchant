@@ -1,18 +1,22 @@
-## Interface: 120000
+## Interface: 120000, 120001
 ## Title: Simple Disenchant
+## Author: Artenola
+## Version: 1.0.0
+
 ## Notes: Easily disenchant items from your bags with a simple interface
 ## Notes-frFR: Désenchantez facilement les objets de vos sacs
 ## Notes-deDE: Entzaubern Sie einfach Gegenstände aus Ihren Taschen
 ## Notes-esES: Desencanta fácilmente objetos de tus bolsas
 ## Notes-itIT: Disincanta facilmente gli oggetti dalle tue borse
 ## Notes-ruRU: Легко распыляйте предметы из сумок
-## Author: Arté
-## Version: 1.0.0
+
 ## IconTexture: Interface\Icons\INV_Enchant_Disenchant
 ## AddonCompartmentFunc: SimpleDisenchant_OnAddonCompartmentClick
 ## SavedVariables: SimpleDisenchantDB
+
 ## Category: Professions
 ## X-Category: Professions
+
 ## X-Website: https://github.com/Artenola/SimpleDisenchant
 ## X-Curse-Project-ID: 1445028
 ## X-Wago-ID: QKy9q4K7

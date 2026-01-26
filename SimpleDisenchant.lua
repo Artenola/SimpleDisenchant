@@ -16,6 +16,7 @@ L["enUS"] = {
     QUALITY_BLUE = "Blue",
     QUALITY_PURPLE = "Purple",
     LOADED_MSG = "/sde to open",
+    DRAG_TO_ACTIONBAR = "Drag to action bar",
 }
 L["enGB"] = L["enUS"]
 
@@ -30,6 +31,7 @@ L["frFR"] = {
     QUALITY_BLUE = "Bleu",
     QUALITY_PURPLE = "Violet",
     LOADED_MSG = "/sde pour ouvrir",
+    DRAG_TO_ACTIONBAR = "Glisser vers la barre d'action",
 }
 
 -- German
@@ -43,6 +45,7 @@ L["deDE"] = {
     QUALITY_BLUE = "Blau",
     QUALITY_PURPLE = "Lila",
     LOADED_MSG = "/sde zum Öffnen",
+    DRAG_TO_ACTIONBAR = "Zur Aktionsleiste ziehen",
 }
 
 -- Spanish (EU + Latin America)
@@ -56,6 +59,7 @@ L["esES"] = {
     QUALITY_BLUE = "Azul",
     QUALITY_PURPLE = "Morado",
     LOADED_MSG = "/sde para abrir",
+    DRAG_TO_ACTIONBAR = "Arrastrar a barra de acción",
 }
 L["esMX"] = L["esES"]
 
@@ -70,6 +74,7 @@ L["itIT"] = {
     QUALITY_BLUE = "Blu",
     QUALITY_PURPLE = "Viola",
     LOADED_MSG = "/sde per aprire",
+    DRAG_TO_ACTIONBAR = "Trascina sulla barra azioni",
 }
 
 -- Russian
@@ -83,6 +88,7 @@ L["ruRU"] = {
     QUALITY_BLUE = "Синий",
     QUALITY_PURPLE = "Фиол.",
     LOADED_MSG = "/sde открыть",
+    DRAG_TO_ACTIONBAR = "Перетащить на панель действий",
 }
 
 -- Select locale (fallback to enUS)
@@ -108,8 +114,8 @@ local qualityFilters = {
 -- Forward declarations
 local ScanBags
 
--- Frame principal
-local frame = CreateFrame("Frame", "SimpleDisenchantFrame", UIParent, "BasicFrameTemplateWithInset")
+-- Frame principal avec style Blizzard (PortraitFrameTemplate)
+local frame = CreateFrame("Frame", "SimpleDisenchantFrame", UIParent, "PortraitFrameTemplate")
 frame:SetSize(320, 450)
 frame:SetPoint("CENTER")
 frame:SetMovable(true)
@@ -119,12 +125,26 @@ frame:SetScript("OnDragStart", frame.StartMoving)
 frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 frame:Hide()
 
-frame.TitleText:SetText(currentL.TITLE)
+-- Configurer le portrait (icône de Désenchanter)
+frame:SetPortraitToAsset("Interface\\Icons\\INV_Enchant_Disenchant")
 
--- Container pour l'icône (pour éviter les problèmes d'ancrage)
+-- Titre
+frame:SetTitle(currentL.TITLE)
+
+-- Hook quand SimpleDisenchant s'ouvre
+frame:HookScript("OnShow", function(self)
+    -- Vérifier si ProfessionsFrame est ouvert
+    if ProfessionsFrame and ProfessionsFrame:IsShown() then
+        -- Coller à droite de ProfessionsFrame
+        self:ClearAllPoints()
+        self:SetPoint("TOPLEFT", ProfessionsFrame, "TOPRIGHT", 5, 0)
+    end
+end)
+
+-- Container pour l'icône de l'item (à côté du bouton DE)
 local iconFrame = CreateFrame("Frame", nil, frame)
 iconFrame:SetSize(44, 44)
-iconFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 15, -30)
+iconFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -60)
 iconFrame:EnableMouse(true)
 
 -- Tooltip sur l'icône
@@ -152,7 +172,7 @@ nextItemBorder:SetVertexColor(1, 1, 1, 1)
 -- Bouton Désenchanter (SecureActionButton)
 local deButton = CreateFrame("Button", "SimpleDisenchantButton", frame, "SecureActionButtonTemplate")
 deButton:SetSize(230, 40)
-deButton:SetPoint("TOPLEFT", frame, "TOPLEFT", 70, -32)
+deButton:SetPoint("LEFT", iconFrame, "RIGHT", 10, 0)
 deButton:RegisterForClicks("LeftButtonUp", "LeftButtonDown")
 
 -- Style du bouton
@@ -182,16 +202,11 @@ deButton.text:SetText(currentL.DISENCHANT)
 -- Configurer le bouton comme macro
 deButton:SetAttribute("type", "macro")
 
--- Compteur
-local countText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-countText:SetPoint("TOP", frame, "TOP", 0, -114)
-countText:SetText("0 objet(s)")
-
 -- Fonction pour créer un bouton de filtre
 local function CreateFilterButton(parent, quality, label, xOffset)
     local btn = CreateFrame("Button", nil, parent)
     btn:SetSize(60, 22)
-    btn:SetPoint("TOP", parent, "TOP", xOffset, -82)
+    btn:SetPoint("TOP", parent, "TOP", xOffset, -110)
 
     local color = QUALITY_COLORS[quality]
 
@@ -245,9 +260,15 @@ local filterGreen = CreateFilterButton(frame, 2, currentL.QUALITY_GREEN, -70)
 local filterBlue = CreateFilterButton(frame, 3, currentL.QUALITY_BLUE, 0)
 local filterPurple = CreateFilterButton(frame, 4, currentL.QUALITY_PURPLE, 70)
 
+-- Compteur
+local countText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+countText:SetPoint("TOP", frame, "TOP", 0, -140)
+countText:SetText("0 objet(s)")
+
+
 -- Conteneur scrollable
 local scrollFrame = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
-scrollFrame:SetPoint("TOPLEFT", 10, -134)
+scrollFrame:SetPoint("TOPLEFT", 10, -160)
 scrollFrame:SetPoint("BOTTOMRIGHT", -30, 10)
 
 local scrollChild = CreateFrame("Frame", nil, scrollFrame)
@@ -398,6 +419,9 @@ end
 
 -- Après un clic, rafraîchir la liste
 deButton:HookScript("OnClick", function()
+    -- Debug: afficher la macro
+    -- local macroText = deButton:GetAttribute("macrotext")
+    -- print("|cffFFD700[SimpleDisenchant]|r Macro: " .. (macroText or "nil"))
     C_Timer.After(2, function()
         if frame:IsShown() and not InCombatLockdown() then
             ScanBags()
@@ -433,6 +457,106 @@ function SimpleDisenchant_OnAddonCompartmentClick(addonName, buttonName)
         frame:Show()
         ScanBags()
     end
+end
+
+-- ============================================
+-- Bouton dans le grimoire des professions (Enchantement)
+-- ============================================
+local DISENCHANT_SPELL_ID = 13262 -- ID du sort Désenchanter
+local professionButton = nil
+
+local function CreateProfessionButton()
+    if professionButton then return end
+
+    -- Vérifier que ProfessionsFrame existe
+    if not ProfessionsFrame then return end
+
+    professionButton = CreateFrame("Button", "SimpleDisenchantProfessionButton", ProfessionsFrame)
+    professionButton:SetSize(36, 36)
+    professionButton:SetPoint("LEFT", ProfessionsFrame.CraftingPage.ConcentrationDisplay, "RIGHT", 0, 0)
+    professionButton:RegisterForClicks("LeftButtonUp")
+    professionButton:RegisterForDrag("LeftButton")
+
+    -- Icône
+    professionButton.icon = professionButton:CreateTexture(nil, "ARTWORK")
+    professionButton.icon:SetSize(36, 36)
+    professionButton.icon:SetPoint("CENTER")
+    professionButton.icon:SetTexture("Interface\\Icons\\INV_Enchant_Disenchant")
+
+    -- Highlight
+    professionButton:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+
+    -- Clic pour ouvrir SimpleDisenchant
+    professionButton:SetScript("OnClick", function()
+        if frame:IsShown() then
+            frame:Hide()
+        else
+            frame:Show()
+            ScanBags()
+        end
+    end)
+
+    -- Drag pour créer une macro sur la barre d'action
+    professionButton:SetScript("OnDragStart", function()
+        if InCombatLockdown() then return end
+
+        -- Créer ou récupérer la macro
+        local macroName = "SimpleDE"
+        local macroIndex = GetMacroIndexByName(macroName)
+
+        if macroIndex == 0 then
+            -- Créer la macro si elle n'existe pas
+            macroIndex = CreateMacro(macroName, "INV_Enchant_Disenchant", "/sde", false)
+        end
+
+        if macroIndex and macroIndex > 0 then
+            PickupMacro(macroIndex)
+        end
+    end)
+
+    professionButton:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(currentL.TITLE)
+        GameTooltip:AddLine(currentL.LOADED_MSG, 1, 1, 1)
+        GameTooltip:AddLine(currentL.DRAG_TO_ACTIONBAR, 0.7, 0.7, 0.7)
+        GameTooltip:Show()
+    end)
+    professionButton:SetScript("OnLeave", GameTooltip_Hide)
+end
+
+-- Hook quand le grimoire des professions s'ouvre
+local function OnProfessionsFrameShow()
+    -- Vérifier si c'est l'enchantement (profession ID 333)
+    local profInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+    if profInfo and profInfo.professionID == 333 then
+        CreateProfessionButton()
+        if professionButton then
+            professionButton:Show()
+        end
+    elseif professionButton then
+        professionButton:Hide()
+    end
+end
+
+-- Charger quand Blizzard_Professions est chargé
+local function SetupProfessionsHook()
+    if ProfessionsFrame then
+        ProfessionsFrame:HookScript("OnShow", OnProfessionsFrameShow)
+    end
+end
+
+-- Attendre que Blizzard_Professions soit chargé
+if C_AddOns.IsAddOnLoaded("Blizzard_Professions") then
+    SetupProfessionsHook()
+else
+    local loader = CreateFrame("Frame")
+    loader:RegisterEvent("ADDON_LOADED")
+    loader:SetScript("OnEvent", function(self, event, addonName)
+        if addonName == "Blizzard_Professions" then
+            SetupProfessionsHook()
+            self:UnregisterEvent("ADDON_LOADED")
+        end
+    end)
 end
 
 print("|cffFFD700[SimpleDisenchant]|r " .. currentL.LOADED_MSG)

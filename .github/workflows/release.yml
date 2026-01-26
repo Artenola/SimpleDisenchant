@@ -21,14 +21,11 @@ jobs:
         id: release_type
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "type=release" >> $GITHUB_OUTPUT
             echo "args=" >> $GITHUB_OUTPUT
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "type=beta" >> $GITHUB_OUTPUT
-            echo "args=-z" >> $GITHUB_OUTPUT
+            echo "args=-n {package-name}-{project-version}{beta}{nolib}{classic}:{project-version}{beta}{classic}{nolib}" >> $GITHUB_OUTPUT
           else
-            echo "type=alpha" >> $GITHUB_OUTPUT
-            echo "args=-z" >> $GITHUB_OUTPUT
+            echo "args=-n {package-name}-{project-version}{alpha}{nolib}{classic}:{project-version}{alpha}{classic}{nolib}" >> $GITHUB_OUTPUT
           fi
 
       - name: Package and Release
@@ -39,4 +36,3 @@ jobs:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          PACKAGER_RELEASE_TYPE: ${{ steps.release_type.outputs.type }}
