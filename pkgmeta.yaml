@@ -9,6 +9,7 @@ ignore:
   - "*.md"
   - pkgmeta.yaml
   - "*.zip"
+  - "*.bat"
 
 manual-changelog:
   filename: CHANGELOG.md
