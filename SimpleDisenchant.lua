@@ -24,7 +24,7 @@ L["enGB"] = L["enUS"]
 L["frFR"] = {
     TITLE = "Simple Disenchant",
     DISENCHANT = "Désenchanter",
-    DISENCHANT_SPELL = "Désenchantement",
+    DISENCHANT_SPELL = "Désenchanter",
     NO_ITEM = "Aucun objet",
     ITEMS_COUNT = "%d objet(s) à désenchanter",
     QUALITY_GREEN = "Vert",
@@ -114,8 +114,8 @@ local qualityFilters = {
 -- Forward declarations
 local ScanBags
 
--- Frame principal
-local frame = CreateFrame("Frame", "SimpleDisenchantFrame", UIParent, "BasicFrameTemplateWithInset")
+-- Frame principal avec style Blizzard (PortraitFrameTemplate)
+local frame = CreateFrame("Frame", "SimpleDisenchantFrame", UIParent, "PortraitFrameTemplate")
 frame:SetSize(320, 450)
 frame:SetPoint("CENTER")
 frame:SetMovable(true)
@@ -125,12 +125,26 @@ frame:SetScript("OnDragStart", frame.StartMoving)
 frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 frame:Hide()
 
-frame.TitleText:SetText(currentL.TITLE)
+-- Configurer le portrait (icône de Désenchanter)
+frame:SetPortraitToAsset("Interface\\Icons\\INV_Enchant_Disenchant")
 
--- Container pour l'icône (pour éviter les problèmes d'ancrage)
+-- Titre
+frame:SetTitle(currentL.TITLE)
+
+-- Hook quand SimpleDisenchant s'ouvre
+frame:HookScript("OnShow", function(self)
+    -- Vérifier si ProfessionsFrame est ouvert
+    if ProfessionsFrame and ProfessionsFrame:IsShown() then
+        -- Coller à droite de ProfessionsFrame
+        self:ClearAllPoints()
+        self:SetPoint("TOPLEFT", ProfessionsFrame, "TOPRIGHT", 5, 0)
+    end
+end)
+
+-- Container pour l'icône de l'item (à côté du bouton DE)
 local iconFrame = CreateFrame("Frame", nil, frame)
 iconFrame:SetSize(44, 44)
-iconFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 15, -30)
+iconFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -60)
 iconFrame:EnableMouse(true)
 
 -- Tooltip sur l'icône
@@ -158,7 +172,7 @@ nextItemBorder:SetVertexColor(1, 1, 1, 1)
 -- Bouton Désenchanter (SecureActionButton)
 local deButton = CreateFrame("Button", "SimpleDisenchantButton", frame, "SecureActionButtonTemplate")
 deButton:SetSize(230, 40)
-deButton:SetPoint("TOPLEFT", frame, "TOPLEFT", 70, -32)
+deButton:SetPoint("LEFT", iconFrame, "RIGHT", 10, 0)
 deButton:RegisterForClicks("LeftButtonUp", "LeftButtonDown")
 
 -- Style du bouton
@@ -188,16 +202,11 @@ deButton.text:SetText(currentL.DISENCHANT)
 -- Configurer le bouton comme macro
 deButton:SetAttribute("type", "macro")
 
--- Compteur
-local countText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-countText:SetPoint("TOP", frame, "TOP", 0, -114)
-countText:SetText("0 objet(s)")
-
 -- Fonction pour créer un bouton de filtre
 local function CreateFilterButton(parent, quality, label, xOffset)
     local btn = CreateFrame("Button", nil, parent)
     btn:SetSize(60, 22)
-    btn:SetPoint("TOP", parent, "TOP", xOffset, -82)
+    btn:SetPoint("TOP", parent, "TOP", xOffset, -110)
 
     local color = QUALITY_COLORS[quality]
 
@@ -251,9 +260,15 @@ local filterGreen = CreateFilterButton(frame, 2, currentL.QUALITY_GREEN, -70)
 local filterBlue = CreateFilterButton(frame, 3, currentL.QUALITY_BLUE, 0)
 local filterPurple = CreateFilterButton(frame, 4, currentL.QUALITY_PURPLE, 70)
 
+-- Compteur
+local countText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+countText:SetPoint("TOP", frame, "TOP", 0, -140)
+countText:SetText("0 objet(s)")
+
+
 -- Conteneur scrollable
 local scrollFrame = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
-scrollFrame:SetPoint("TOPLEFT", 10, -134)
+scrollFrame:SetPoint("TOPLEFT", 10, -160)
 scrollFrame:SetPoint("BOTTOMRIGHT", -30, 10)
 
 local scrollChild = CreateFrame("Frame", nil, scrollFrame)
@@ -404,6 +419,9 @@ end
 
 -- Après un clic, rafraîchir la liste
 deButton:HookScript("OnClick", function()
+    -- Debug: afficher la macro
+    -- local macroText = deButton:GetAttribute("macrotext")
+    -- print("|cffFFD700[SimpleDisenchant]|r Macro: " .. (macroText or "nil"))
     C_Timer.After(2, function()
         if frame:IsShown() and not InCombatLockdown() then
             ScanBags()
@@ -444,7 +462,7 @@ end
 -- ============================================
 -- Bouton dans le grimoire des professions (Enchantement)
 -- ============================================
-local DISENCHANT_SPELL_ID = 13262 -- ID du sort Désenchantement
+local DISENCHANT_SPELL_ID = 13262 -- ID du sort Désenchanter
 local professionButton = nil
 
 local function CreateProfessionButton()
@@ -454,29 +472,19 @@ local function CreateProfessionButton()
     if not ProfessionsFrame then return end
 
     professionButton = CreateFrame("Button", "SimpleDisenchantProfessionButton", ProfessionsFrame)
-    professionButton:SetSize(44, 44)
+    professionButton:SetSize(36, 36)
     professionButton:SetPoint("LEFT", ProfessionsFrame.CraftingPage.ConcentrationDisplay, "RIGHT", 0, 0)
-    professionButton:RegisterForDrag("LeftButton")
     professionButton:RegisterForClicks("LeftButtonUp")
+    professionButton:RegisterForDrag("LeftButton")
 
     -- Icône
     professionButton.icon = professionButton:CreateTexture(nil, "ARTWORK")
     professionButton.icon:SetSize(36, 36)
     professionButton.icon:SetPoint("CENTER")
-    professionButton.icon:SetTexture("Interface\\AddOns\\SimpleDisenchant\\media\\SimpleDisenchant_400_400")
-
-    -- Bordure
-    professionButton.border = professionButton:CreateTexture(nil, "OVERLAY")
-    professionButton.border:SetSize(44, 44)
-    professionButton.border:SetPoint("CENTER")
-    professionButton.border:SetTexture("Interface\\Buttons\\UI-Quickslot2")
+    professionButton.icon:SetTexture("Interface\\Icons\\INV_Enchant_Disenchant")
 
     -- Highlight
-    professionButton.highlight = professionButton:CreateTexture(nil, "HIGHLIGHT")
-    professionButton.highlight:SetSize(44, 44)
-    professionButton.highlight:SetPoint("CENTER")
-    professionButton.highlight:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
-    professionButton.highlight:SetBlendMode("ADD")
+    professionButton:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
 
     -- Clic pour ouvrir SimpleDisenchant
     professionButton:SetScript("OnClick", function()
@@ -488,10 +496,21 @@ local function CreateProfessionButton()
         end
     end)
 
-    -- Drag pour mettre le sort dans la barre d'action
+    -- Drag pour créer une macro sur la barre d'action
     professionButton:SetScript("OnDragStart", function()
-        if not InCombatLockdown() then
-            PickupSpell(DISENCHANT_SPELL_ID)
+        if InCombatLockdown() then return end
+
+        -- Créer ou récupérer la macro
+        local macroName = "SimpleDE"
+        local macroIndex = GetMacroIndexByName(macroName)
+
+        if macroIndex == 0 then
+            -- Créer la macro si elle n'existe pas
+            macroIndex = CreateMacro(macroName, "INV_Enchant_Disenchant", "/sde", false)
+        end
+
+        if macroIndex and macroIndex > 0 then
+            PickupMacro(macroIndex)
         end
     end)
 
