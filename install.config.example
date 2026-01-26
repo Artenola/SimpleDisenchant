@@ -1,0 +1,13 @@
+# SimpleDisenchant Install Configuration
+# Copy this file to install.config and modify for your setup
+
+# Path to World of Warcraft installation (without trailing slash)
+# Windows example: D:\programs\World of Warcraft
+# macOS example: /Applications/World of Warcraft
+WOW_PATH=D:\programs\World of Warcraft
+
+# WoW version folder (_retail_, _classic_, _classic_era_, etc.)
+WOW_VERSION=_retail_
+
+# Addon name (usually matches the .toc file name)
+ADDON_NAME=SimpleDisenchant
