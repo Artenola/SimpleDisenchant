@@ -24,9 +24,9 @@ jobs:
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             echo "No args for stable release"
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            args="${args} -n {package-name}-{project-version}{beta}{nolib}{classic}:{project-version}{beta}{classic}{nolib}"
+            args="${args} -n '{package-name}-{project-version}{beta}{nolib}{classic}:{project-version}{beta}{classic}{nolib}'"
           else
-            args="${args} -n {package-name}-{project-version}{alpha}{nolib}{classic}:{project-version}{alpha}{classic}{nolib}"
+            args="${args} -n '{package-name}-{project-version}{alpha}{nolib}{classic}:{project-version}{alpha}{classic}{nolib}'"
           fi
           echo $args >> $GITHUB_OUTPUT
 
