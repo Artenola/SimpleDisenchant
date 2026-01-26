@@ -425,4 +425,14 @@ frame:SetScript("OnEvent", function(self, event)
     end
 end)
 
+-- Fonction pour le bouton du compartiment addon (menu en haut à droite)
+function SimpleDisenchant_OnAddonCompartmentClick(addonName, buttonName)
+    if frame:IsShown() then
+        frame:Hide()
+    else
+        frame:Show()
+        ScanBags()
+    end
+end
+
 print("|cffFFD700[SimpleDisenchant]|r " .. currentL.LOADED_MSG)
