@@ -125,6 +125,9 @@ frame:SetScript("OnDragStart", frame.StartMoving)
 frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 frame:Hide()
 
+-- Permet de fermer avec Échap
+tinsert(UISpecialFrames, "SimpleDisenchantFrame")
+
 -- Configurer le portrait (icône de Désenchanter)
 frame:SetPortraitToAsset("Interface\\Icons\\INV_Enchant_Disenchant")
 
