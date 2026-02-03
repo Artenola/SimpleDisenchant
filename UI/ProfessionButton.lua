@@ -1,7 +1,6 @@
 -- SimpleDisenchant Profession Button
 local addonName, addon = ...
 
-local L = addon.currentLocale
 local C = addon.Constants
 
 addon.ProfessionButton = {}
@@ -53,6 +52,7 @@ local function CreateButton()
     end)
 
     professionButton:SetScript("OnEnter", function(self)
+        local L = addon.currentLocale
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L.TITLE)
         GameTooltip:AddLine(L.LOADED_MSG, 1, 1, 1)

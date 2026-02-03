@@ -1,7 +1,6 @@
 -- SimpleDisenchant Filter Buttons
 local addonName, addon = ...
 
-local L = addon.currentLocale
 local C = addon.Constants
 
 addon.FilterButtons = {}
@@ -80,6 +79,7 @@ function FilterButtons:CreateButton(parent, quality, label, xOffset)
 end
 
 function FilterButtons:CreateAll(parent)
+    local L = addon.currentLocale
     local green = self:CreateButton(parent, 2, L.QUALITY_GREEN, -70)
     local blue = self:CreateButton(parent, 3, L.QUALITY_BLUE, 0)
     local purple = self:CreateButton(parent, 4, L.QUALITY_PURPLE, 70)

@@ -1,7 +1,6 @@
 -- SimpleDisenchant Main Frame
 local addonName, addon = ...
 
-local L = addon.currentLocale
 local C = addon.Constants
 local Utils = addon.Utils
 
@@ -13,6 +12,8 @@ local frame
 
 function MainFrame:Create()
     if frame then return frame end
+
+    local L = addon.currentLocale
 
     -- Create main frame with Blizzard portrait template
     frame = CreateFrame("Frame", "SimpleDisenchantFrame", UIParent, "PortraitFrameTemplate")

@@ -22,6 +22,8 @@ L["enUS"] = {
 -- English GB uses same as US
 L["enGB"] = L["enUS"]
 
--- Get current locale with fallback to enUS
-local locale = GetLocale()
-addon.currentLocale = L[locale] or L["enUS"]
+-- Store player locale for later use
+addon.playerLocale = GetLocale()
+
+-- Set default currentLocale to English (will be updated in main file after all locales load)
+addon.currentLocale = L["enUS"]

@@ -3,10 +3,10 @@ local addonName, addon = ...
 
 addon.L["frFR"] = {
     TITLE = "Simple Disenchant",
-    DISENCHANT = "Desenchanter",
-    DISENCHANT_SPELL = "Desenchanter",
+    DISENCHANT = "Désenchanter",
+    DISENCHANT_SPELL = "Désenchanter",
     NO_ITEM = "Aucun objet",
-    ITEMS_COUNT = "%d objet(s) a desenchanter",
+    ITEMS_COUNT = "%d objet(s) à désenchanter",
     QUALITY_GREEN = "Vert",
     QUALITY_BLUE = "Bleu",
     QUALITY_PURPLE = "Violet",

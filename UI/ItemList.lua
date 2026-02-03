@@ -1,7 +1,6 @@
 -- SimpleDisenchant Item List
 local addonName, addon = ...
 
-local L = addon.currentLocale
 local C = addon.Constants
 local Utils = addon.Utils
 local FilterButtons = addon.FilterButtons
@@ -67,6 +66,8 @@ function ItemList:CreateIconFrame(parent)
 end
 
 function ItemList:CreateDisenchantButton(parent)
+    local L = addon.currentLocale
+
     -- Disenchant button (SecureActionButton)
     deButton = CreateFrame("Button", "SimpleDisenchantButton", parent, "SecureActionButtonTemplate")
     deButton:SetSize(230, 40)
@@ -134,6 +135,8 @@ end
 function ItemList:UpdateDisenchantButton()
     if InCombatLockdown() then return end
 
+    local L = addon.currentLocale
+
     if #disenchantList > 0 then
         local firstItem = disenchantList[1]
         local macroText = "/cast " .. L.DISENCHANT_SPELL .. "\n/use " .. firstItem.bag .. " " .. firstItem.slot
@@ -159,6 +162,8 @@ function ItemList:UpdateDisenchantButton()
 end
 
 function ItemList:ScanBags()
+    local L = addon.currentLocale
+
     -- Clear list
     wipe(disenchantList)
 

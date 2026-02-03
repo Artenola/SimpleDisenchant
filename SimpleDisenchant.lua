@@ -1,6 +1,9 @@
 -- SimpleDisenchant: Main Entry Point
 local addonName, addon = ...
 
+-- Update locale now that all locale files are loaded
+addon.currentLocale = addon.L[addon.playerLocale] or addon.L["enUS"]
+
 local L = addon.currentLocale
 local Utils = addon.Utils
 local MainFrame = addon.MainFrame
