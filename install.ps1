@@ -59,6 +59,30 @@ Write-Host ""
 Copy-Item "$SOURCE\$ADDON_NAME.toc" -Destination $WOW_ADDONS -Force
 Copy-Item "$SOURCE\$ADDON_NAME.lua" -Destination $WOW_ADDONS -Force
 
+# Copy Locales folder
+if (Test-Path "$SOURCE\Locales") {
+    if (-not (Test-Path "$WOW_ADDONS\Locales")) {
+        New-Item -ItemType Directory -Path "$WOW_ADDONS\Locales" | Out-Null
+    }
+    Copy-Item "$SOURCE\Locales\*" -Destination "$WOW_ADDONS\Locales" -Recurse -Force
+}
+
+# Copy Core folder
+if (Test-Path "$SOURCE\Core") {
+    if (-not (Test-Path "$WOW_ADDONS\Core")) {
+        New-Item -ItemType Directory -Path "$WOW_ADDONS\Core" | Out-Null
+    }
+    Copy-Item "$SOURCE\Core\*" -Destination "$WOW_ADDONS\Core" -Recurse -Force
+}
+
+# Copy UI folder
+if (Test-Path "$SOURCE\UI") {
+    if (-not (Test-Path "$WOW_ADDONS\UI")) {
+        New-Item -ItemType Directory -Path "$WOW_ADDONS\UI" | Out-Null
+    }
+    Copy-Item "$SOURCE\UI\*" -Destination "$WOW_ADDONS\UI" -Recurse -Force
+}
+
 # Copy media folder if exists
 if (Test-Path "$SOURCE\media") {
     if (-not (Test-Path "$WOW_ADDONS\media")) {
