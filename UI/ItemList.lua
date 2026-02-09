@@ -4,6 +4,7 @@ local addonName, addon = ...
 local C = addon.Constants
 local Utils = addon.Utils
 local FilterButtons = addon.FilterButtons
+local Blacklist = addon.Blacklist
 
 addon.ItemList = {}
 local ItemList = addon.ItemList
@@ -183,8 +184,9 @@ function ItemList:ScanBags()
                 local itemName, _, quality = C_Item.GetItemInfo(info.hyperlink)
                 local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(info.hyperlink)
 
-                -- Armor or Weapon, green+ quality, and filter active
-                if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterButtons:IsQualityEnabled(quality) then
+                -- Armor or Weapon, green+ quality, filter active, and not blacklisted
+                local isBlacklisted = Blacklist and Blacklist:IsBlacklisted(info.itemID)
+                if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterButtons:IsQualityEnabled(quality) and not isBlacklisted then
                     count = count + 1
 
                     -- Add to list
@@ -194,7 +196,8 @@ function ItemList:ScanBags()
                         link = info.hyperlink,
                         name = itemName,
                         icon = info.iconFileID,
-                        quality = quality
+                        quality = quality,
+                        itemID = info.itemID
                     })
 
                     local btn = itemButtons[count]
@@ -234,25 +237,42 @@ function ItemList:ScanBags()
                     -- Store data
                     btn.itemBag = bag
                     btn.itemSlot = slot
+                    btn.itemID = info.itemID
+                    btn.itemName = itemName
+
+                    btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
                     btn:SetScript("OnEnter", function(self)
+                        local L = addon.currentLocale
                         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                         GameTooltip:SetBagItem(self.itemBag, self.itemSlot)
+                        GameTooltip:AddLine(" ")
+                        GameTooltip:AddLine(L.BLACKLIST_HINT or "Right-click to blacklist", 0.7, 0.7, 0.7)
                         GameTooltip:Show()
                     end)
                     btn:SetScript("OnLeave", GameTooltip_Hide)
 
-                    -- Click to select item as next to disenchant
-                    btn:SetScript("OnClick", function(self)
+                    -- Left-click to select, Right-click to blacklist
+                    btn:SetScript("OnClick", function(self, button)
                         if InCombatLockdown() then return end
-                        for i, item in ipairs(disenchantList) do
-                            if item.bag == self.itemBag and item.slot == self.itemSlot then
-                                table.remove(disenchantList, i)
-                                table.insert(disenchantList, 1, item)
-                                break
+
+                        if button == "RightButton" then
+                            -- Blacklist item
+                            if Blacklist and self.itemID then
+                                Blacklist:Add(self.itemID, self.itemName)
+                                ItemList:ScanBags()
                             end
+                        else
+                            -- Select item as next to disenchant
+                            for i, item in ipairs(disenchantList) do
+                                if item.bag == self.itemBag and item.slot == self.itemSlot then
+                                    table.remove(disenchantList, i)
+                                    table.insert(disenchantList, 1, item)
+                                    break
+                                end
+                            end
+                            ItemList:UpdateDisenchantButton()
                         end
-                        ItemList:UpdateDisenchantButton()
                     end)
 
                     yOffset = yOffset + C.ITEM_ROW_HEIGHT

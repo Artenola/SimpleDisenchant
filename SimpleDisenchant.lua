@@ -10,9 +10,14 @@ local MainFrame = addon.MainFrame
 local FilterButtons = addon.FilterButtons
 local ItemList = addon.ItemList
 local ProfessionButton = addon.ProfessionButton
+local Blacklist = addon.Blacklist
+local BlacklistFrame = addon.BlacklistFrame
 
 -- Initialize addon
 local function Initialize()
+    -- Initialize blacklist (loads SavedVariables)
+    Blacklist:Initialize()
+
     -- Create main frame
     local frame = MainFrame:Create()
 
@@ -37,10 +42,27 @@ end
 
 -- Slash command
 SLASH_SIMPLEDISENCHANT1 = "/sde"
-SlashCmdList["SIMPLEDISENCHANT"] = function()
-    MainFrame:Toggle()
-    if MainFrame:IsShown() then
-        ItemList:ScanBags()
+SlashCmdList["SIMPLEDISENCHANT"] = function(msg)
+    local cmd = msg:lower():trim()
+
+    if cmd == "blacklist" or cmd == "bl" then
+        -- Open blacklist frame
+        BlacklistFrame:Toggle()
+    elseif cmd == "blacklist clear" or cmd == "bl clear" then
+        -- Clear blacklist
+        Blacklist:Clear()
+        if BlacklistFrame:IsShown() then
+            BlacklistFrame:Refresh()
+        end
+        if MainFrame:IsShown() then
+            ItemList:ScanBags()
+        end
+    else
+        -- Default: toggle main frame
+        MainFrame:Toggle()
+        if MainFrame:IsShown() then
+            ItemList:ScanBags()
+        end
     end
 end
 

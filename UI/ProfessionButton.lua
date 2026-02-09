@@ -51,12 +51,29 @@ local function CreateButton()
         end
     end)
 
+    professionButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+    professionButton:SetScript("OnClick", function(self, button)
+        if button == "RightButton" then
+            -- Right-click: open blacklist
+            addon.BlacklistFrame:Toggle()
+        else
+            -- Left-click: open main frame
+            addon.MainFrame:Toggle()
+            if addon.MainFrame:IsShown() then
+                addon.ItemList:ScanBags()
+            end
+        end
+    end)
+
     professionButton:SetScript("OnEnter", function(self)
         local L = addon.currentLocale
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(L.TITLE)
         GameTooltip:AddLine(L.LOADED_MSG, 1, 1, 1)
         GameTooltip:AddLine(L.DRAG_TO_ACTIONBAR, 0.7, 0.7, 0.7)
+        GameTooltip:AddLine(" ")
+        GameTooltip:AddLine(L.BLACKLIST_OPEN_HINT or "Right-click for blacklist", 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)
     professionButton:SetScript("OnLeave", GameTooltip_Hide)

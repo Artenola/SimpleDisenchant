@@ -35,6 +35,30 @@ function MainFrame:Create()
     -- Set title
     frame:SetTitle(L.TITLE)
 
+    -- Blacklist button (top right corner)
+    local blBtn = CreateFrame("Button", nil, frame)
+    blBtn:SetSize(24, 24)
+    blBtn:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -30, -2)
+
+    blBtn.icon = blBtn:CreateTexture(nil, "ARTWORK")
+    blBtn.icon:SetAllPoints()
+    blBtn.icon:SetTexture("Interface\\Icons\\INV_Misc_Cancel")
+    blBtn.icon:SetDesaturated(false)
+
+    blBtn:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+
+    blBtn:SetScript("OnClick", function()
+        addon.BlacklistFrame:Toggle()
+    end)
+
+    blBtn:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(L.BLACKLIST_TITLE or "Blacklist")
+        GameTooltip:AddLine(L.BLACKLIST_HINT or "Right-click to blacklist", 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    blBtn:SetScript("OnLeave", GameTooltip_Hide)
+
     -- Dock to ProfessionsFrame when opened from there
     frame:HookScript("OnShow", function(self)
         if ProfessionsFrame and ProfessionsFrame:IsShown() then

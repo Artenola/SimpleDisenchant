@@ -1,7 +1,7 @@
 ## Interface: 120000, 120001
 ## Title: Simple Disenchant
 ## Author: Artenola
-## Version: 1.1.0
+## Version: 1.2.0
 
 ## Notes: Easily disenchant items from your bags with a simple interface
 ## Notes-frFR: Desenchantez facilement les objets de vos sacs
@@ -33,12 +33,14 @@ Locales\ruRU.lua
 # Core
 Core\Constants.lua
 Core\Utils.lua
+Core\Blacklist.lua
 
 # UI
 UI\MainFrame.lua
 UI\FilterButtons.lua
 UI\ItemList.lua
 UI\ProfessionButton.lua
+UI\BlacklistFrame.lua
 
 # Main
 SimpleDisenchant.lua
