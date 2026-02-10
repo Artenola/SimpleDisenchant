@@ -8,6 +8,22 @@ local Blacklist = addon.Blacklist
 local blacklistedItems = {}
 local initialized = false
 
+-- Helper to extract unique item string from item link
+-- Format: item:itemID:enchantID:gemID1:gemID2:gemID3:gemID4:suffixID:uniqueID:linkLevel:specializationID:upgradeTypeID:instanceDifficultyID:numBonusIDs:bonusID1:bonusID2:...
+local function GetItemStringFromLink(itemLink)
+    if not itemLink then return nil end
+    -- Extract the full item string from the link
+    local itemString = itemLink:match("item[%-?%d:]+")
+    return itemString
+end
+
+-- Get the blacklist key from an item link
+local function GetBlacklistKey(itemLink)
+    local itemString = GetItemStringFromLink(itemLink)
+    if not itemString then return nil end
+    return itemString
+end
+
 function Blacklist:Initialize()
     if initialized then return end
 
@@ -30,15 +46,23 @@ function Blacklist:Initialize()
     end)
 end
 
-function Blacklist:IsBlacklisted(itemID)
-    return blacklistedItems[itemID] ~= nil
+function Blacklist:IsBlacklisted(itemLink)
+    if not itemLink then return false end
+    local key = GetBlacklistKey(itemLink)
+    if not key then return false end
+    return blacklistedItems[key] ~= nil
 end
 
-function Blacklist:Add(itemID, itemName)
-    if not itemID then return false end
+function Blacklist:Add(itemLink, itemName, itemID)
+    if not itemLink then return false end
 
-    blacklistedItems[itemID] = {
+    local key = GetBlacklistKey(itemLink)
+    if not key then return false end
+
+    blacklistedItems[key] = {
         name = itemName or "Unknown",
+        itemID = itemID,
+        link = itemLink,
         addedAt = time()
     }
 
@@ -48,7 +72,7 @@ function Blacklist:Add(itemID, itemName)
     end
 
     local L = addon.currentLocale
-    addon.Utils:Print(string.format(L.BLACKLIST_ADDED or "%s added to blacklist", itemName or itemID))
+    addon.Utils:Print(string.format(L.BLACKLIST_ADDED or "%s added to blacklist", itemName or key))
 
     -- Refresh blacklist frame if open
     if addon.BlacklistFrame and addon.BlacklistFrame:IsShown() then
@@ -58,11 +82,11 @@ function Blacklist:Add(itemID, itemName)
     return true
 end
 
-function Blacklist:Remove(itemID)
-    if not itemID or not blacklistedItems[itemID] then return false end
+function Blacklist:Remove(key)
+    if not key or not blacklistedItems[key] then return false end
 
-    local itemName = blacklistedItems[itemID].name
-    blacklistedItems[itemID] = nil
+    local itemName = blacklistedItems[key].name
+    blacklistedItems[key] = nil
 
     -- Ensure it's saved to DB
     if SimpleDisenchantDB then
@@ -70,7 +94,7 @@ function Blacklist:Remove(itemID)
     end
 
     local L = addon.currentLocale
-    addon.Utils:Print(string.format(L.BLACKLIST_REMOVED or "%s removed from blacklist", itemName or itemID))
+    addon.Utils:Print(string.format(L.BLACKLIST_REMOVED or "%s removed from blacklist", itemName or key))
 
     -- Refresh blacklist frame if open
     if addon.BlacklistFrame and addon.BlacklistFrame:IsShown() then
@@ -80,11 +104,12 @@ function Blacklist:Remove(itemID)
     return true
 end
 
-function Blacklist:Toggle(itemID, itemName)
-    if self:IsBlacklisted(itemID) then
-        return self:Remove(itemID)
+function Blacklist:Toggle(itemLink, itemName, itemID)
+    if self:IsBlacklisted(itemLink) then
+        local key = GetBlacklistKey(itemLink)
+        return self:Remove(key)
     else
-        return self:Add(itemID, itemName)
+        return self:Add(itemLink, itemName, itemID)
     end
 end
 

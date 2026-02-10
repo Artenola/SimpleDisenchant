@@ -89,7 +89,7 @@ function BlacklistFrame:Refresh()
     local yOffset = 0
     local count = 0
 
-    for itemID, data in pairs(blacklist) do
+    for itemKey, data in pairs(blacklist) do
         count = count + 1
 
         local btn = itemButtons[count]
@@ -120,11 +120,19 @@ function BlacklistFrame:Refresh()
             itemButtons[count] = btn
         end
 
-        -- Get item info
-        local itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(itemID)
+        -- Get item info using stored itemID or link
+        local itemID = data.itemID
+        local itemLink = data.link
+        local itemName, _, quality, _, _, _, _, _, _, itemTexture
+
+        if itemLink then
+            itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(itemLink)
+        elseif itemID then
+            itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(itemID)
+        end
 
         btn.icon:SetTexture(itemTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
-        btn.text:SetText(itemName or data.name or ("Item " .. itemID))
+        btn.text:SetText(itemName or data.name or ("Item " .. (itemID or "?")))
 
         -- Color by quality
         if quality then
@@ -139,15 +147,22 @@ function BlacklistFrame:Refresh()
         btn:SetPoint("TOPLEFT", 0, -yOffset)
         btn:Show()
 
-        -- Store itemID
+        -- Store the key (item string) for removal
+        btn.itemKey = itemKey
         btn.itemID = itemID
+        btn.itemLink = itemLink
         btn.itemName = itemName or data.name
 
         btn:RegisterForClicks("RightButtonUp")
 
         btn:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:SetItemByID(self.itemID)
+            -- Try to show tooltip from link first, fallback to itemID
+            if self.itemLink then
+                GameTooltip:SetHyperlink(self.itemLink)
+            elseif self.itemID then
+                GameTooltip:SetItemByID(self.itemID)
+            end
             GameTooltip:AddLine(" ")
             GameTooltip:AddLine(L.BLACKLIST_REMOVE_HINT or "Right-click to remove", 0.7, 0.7, 0.7)
             GameTooltip:Show()
@@ -156,7 +171,7 @@ function BlacklistFrame:Refresh()
 
         btn:SetScript("OnClick", function(self, button)
             if button == "RightButton" then
-                Blacklist:Remove(self.itemID)
+                Blacklist:Remove(self.itemKey)
                 BlacklistFrame:Refresh()
                 if addon.MainFrame:IsShown() then
                     addon.ItemList:ScanBags()
