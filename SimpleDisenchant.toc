@@ -12,7 +12,7 @@
 
 ## IconTexture: Interface\Icons\INV_Enchant_Disenchant
 ## AddonCompartmentFunc: SimpleDisenchant_OnAddonCompartmentClick
-## SavedVariables: SimpleDisenchantDB
+## SavedVariablesPerCharacter: SimpleDisenchantDB
 
 ## Category: Professions
 ## X-Category: Professions

@@ -185,7 +185,7 @@ function ItemList:ScanBags()
                 local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(info.hyperlink)
 
                 -- Armor or Weapon, green+ quality, filter active, and not blacklisted
-                local isBlacklisted = Blacklist and Blacklist:IsBlacklisted(info.itemID)
+                local isBlacklisted = Blacklist and Blacklist:IsBlacklisted(info.hyperlink)
                 if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterButtons:IsQualityEnabled(quality) and not isBlacklisted then
                     count = count + 1
 
@@ -239,6 +239,7 @@ function ItemList:ScanBags()
                     btn.itemSlot = slot
                     btn.itemID = info.itemID
                     btn.itemName = itemName
+                    btn.itemLink = info.hyperlink
 
                     btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
@@ -257,9 +258,9 @@ function ItemList:ScanBags()
                         if InCombatLockdown() then return end
 
                         if button == "RightButton" then
-                            -- Blacklist item
-                            if Blacklist and self.itemID then
-                                Blacklist:Add(self.itemID, self.itemName)
+                            -- Blacklist item (using full item link for unique identification)
+                            if Blacklist and self.itemLink then
+                                Blacklist:Add(self.itemLink, self.itemName, self.itemID)
                                 ItemList:ScanBags()
                             end
                         else
