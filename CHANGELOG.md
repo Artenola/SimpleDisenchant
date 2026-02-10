@@ -2,6 +2,17 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.2.1] - 2025-02-10
+
+### Fixed
+- Blacklist is now per-character instead of global (#10)
+- Blacklist now uses unique item identification (item link with bonus IDs) instead of generic itemID (#11)
+  - This allows blacklisting a specific item variant without affecting other items of the same base type
+
+### Changed
+- Changed SavedVariables to SavedVariablesPerCharacter
+- Tooltip in blacklist frame shows exact item stats via SetHyperlink
+
 ## [1.2.0] - 2025-02-09
 
 ### Added
