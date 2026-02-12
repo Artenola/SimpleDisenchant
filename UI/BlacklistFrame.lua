@@ -7,8 +7,7 @@ addon.BlacklistFrame = {}
 local BlacklistFrame = addon.BlacklistFrame
 
 local frame
-local scrollFrame, scrollChild
-local itemButtons = {}
+local scrollBox, scrollBar
 local countText
 
 function BlacklistFrame:Create()
@@ -54,14 +53,103 @@ function BlacklistFrame:Create()
         end
     end)
 
-    -- Scroll frame
-    scrollFrame = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", 10, -85)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -30, 10)
+    -- Inset background behind the scroll list
+    local inset = CreateFrame("Frame", nil, frame, "InsetFrameTemplate")
+    inset:SetPoint("TOPLEFT", 7, -80)
+    inset:SetPoint("BOTTOMRIGHT", -7, 5)
 
-    scrollChild = CreateFrame("Frame", nil, scrollFrame)
-    scrollChild:SetSize(240, 1)
-    scrollFrame:SetScrollChild(scrollChild)
+    -- Modern ScrollBox (inside the inset)
+    scrollBox = CreateFrame("Frame", nil, frame, "WowScrollBoxList")
+    scrollBox:SetPoint("TOPLEFT", inset, "TOPLEFT", 3, -3)
+    scrollBox:SetPoint("BOTTOMRIGHT", inset, "BOTTOMRIGHT", -3, 3)
+
+    -- Modern MinimalScrollBar
+    scrollBar = CreateFrame("EventFrame", nil, frame, "MinimalScrollBar")
+    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 4, 0)
+    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 4, 0)
+
+    -- Create linear view
+    local view = CreateScrollBoxListLinearView()
+    view:SetElementExtent(32)
+
+    -- Element initializer
+    view:SetElementInitializer("Button", function(btn, elementData)
+        btn:SetSize(scrollBox:GetWidth(), 30)
+
+        -- Create UI elements once
+        if not btn.bg then
+            btn.bg = btn:CreateTexture(nil, "BACKGROUND")
+            btn.bg:SetAllPoints()
+            btn.bg:SetColorTexture(0.1, 0.1, 0.1, 0.5)
+
+            btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+
+            btn.icon = btn:CreateTexture(nil, "ARTWORK")
+            btn.icon:SetSize(24, 24)
+            btn.icon:SetPoint("LEFT", btn, "LEFT", 4, 0)
+
+            btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 8, 0)
+            btn.text:SetPoint("RIGHT", btn, "RIGHT", -5, 0)
+            btn.text:SetJustifyH("LEFT")
+            btn.text:SetWordWrap(false)
+        end
+
+        -- Get item info
+        local itemName, _, quality, _, _, _, _, _, _, itemTexture
+        if elementData.link then
+            itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(elementData.link)
+        elseif elementData.itemID then
+            itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(elementData.itemID)
+        end
+
+        btn.icon:SetTexture(itemTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
+        btn.text:SetText(itemName or elementData.name or ("Item " .. (elementData.itemID or "?")))
+
+        -- Color by quality
+        if quality then
+            local color = ITEM_QUALITY_COLORS[quality]
+            if color then
+                btn.text:SetTextColor(color.r, color.g, color.b)
+            end
+        else
+            btn.text:SetTextColor(1, 1, 1)
+        end
+
+        -- Store data
+        btn.itemKey = elementData.itemKey
+        btn.itemID = elementData.itemID
+        btn.itemLink = elementData.link
+        btn.itemName = itemName or elementData.name
+
+        btn:RegisterForClicks("RightButtonUp")
+
+        btn:SetScript("OnEnter", function(self)
+            local L = addon.currentLocale
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            if self.itemLink then
+                GameTooltip:SetHyperlink(self.itemLink)
+            elseif self.itemID then
+                GameTooltip:SetItemByID(self.itemID)
+            end
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine(L.BLACKLIST_REMOVE_HINT or "Right-click to remove", 0.7, 0.7, 0.7)
+            GameTooltip:Show()
+        end)
+        btn:SetScript("OnLeave", GameTooltip_Hide)
+
+        btn:SetScript("OnClick", function(self, button)
+            if button == "RightButton" then
+                addon.Blacklist:Remove(self.itemKey)
+                BlacklistFrame:Refresh()
+                if addon.MainFrame:IsShown() then
+                    addon.ItemList:ScanBags()
+                end
+            end
+        end)
+    end)
+
+    ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
 
     -- Dock to MainFrame when shown
     frame:HookScript("OnShow", function(self)
@@ -80,109 +168,21 @@ function BlacklistFrame:Refresh()
     local L = addon.currentLocale
     local Blacklist = addon.Blacklist
 
-    -- Hide old buttons
-    for _, btn in ipairs(itemButtons) do
-        btn:Hide()
-    end
-
     local blacklist = Blacklist:GetAll()
-    local yOffset = 0
     local count = 0
 
+    local dataProvider = CreateDataProvider()
     for itemKey, data in pairs(blacklist) do
         count = count + 1
-
-        local btn = itemButtons[count]
-        if not btn then
-            btn = CreateFrame("Button", nil, scrollChild)
-            btn:SetSize(240, 30)
-
-            -- Background
-            btn.bg = btn:CreateTexture(nil, "BACKGROUND")
-            btn.bg:SetAllPoints()
-            btn.bg:SetColorTexture(0.1, 0.1, 0.1, 0.5)
-
-            -- Highlight
-            btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
-
-            -- Icon
-            btn.icon = btn:CreateTexture(nil, "ARTWORK")
-            btn.icon:SetSize(24, 24)
-            btn.icon:SetPoint("LEFT", btn, "LEFT", 4, 0)
-
-            -- Item name
-            btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 8, 0)
-            btn.text:SetPoint("RIGHT", btn, "RIGHT", -5, 0)
-            btn.text:SetJustifyH("LEFT")
-            btn.text:SetWordWrap(false)
-
-            itemButtons[count] = btn
-        end
-
-        -- Get item info using stored itemID or link
-        local itemID = data.itemID
-        local itemLink = data.link
-        local itemName, _, quality, _, _, _, _, _, _, itemTexture
-
-        if itemLink then
-            itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(itemLink)
-        elseif itemID then
-            itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(itemID)
-        end
-
-        btn.icon:SetTexture(itemTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
-        btn.text:SetText(itemName or data.name or ("Item " .. (itemID or "?")))
-
-        -- Color by quality
-        if quality then
-            local color = ITEM_QUALITY_COLORS[quality]
-            if color then
-                btn.text:SetTextColor(color.r, color.g, color.b)
-            end
-        else
-            btn.text:SetTextColor(1, 1, 1)
-        end
-
-        btn:SetPoint("TOPLEFT", 0, -yOffset)
-        btn:Show()
-
-        -- Store the key (item string) for removal
-        btn.itemKey = itemKey
-        btn.itemID = itemID
-        btn.itemLink = itemLink
-        btn.itemName = itemName or data.name
-
-        btn:RegisterForClicks("RightButtonUp")
-
-        btn:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            -- Try to show tooltip from link first, fallback to itemID
-            if self.itemLink then
-                GameTooltip:SetHyperlink(self.itemLink)
-            elseif self.itemID then
-                GameTooltip:SetItemByID(self.itemID)
-            end
-            GameTooltip:AddLine(" ")
-            GameTooltip:AddLine(L.BLACKLIST_REMOVE_HINT or "Right-click to remove", 0.7, 0.7, 0.7)
-            GameTooltip:Show()
-        end)
-        btn:SetScript("OnLeave", GameTooltip_Hide)
-
-        btn:SetScript("OnClick", function(self, button)
-            if button == "RightButton" then
-                Blacklist:Remove(self.itemKey)
-                BlacklistFrame:Refresh()
-                if addon.MainFrame:IsShown() then
-                    addon.ItemList:ScanBags()
-                end
-            end
-        end)
-
-        yOffset = yOffset + 32
+        dataProvider:Insert({
+            itemKey = itemKey,
+            itemID = data.itemID,
+            link = data.link,
+            name = data.name,
+        })
     end
 
-    scrollChild:SetHeight(math.max(yOffset, 1))
+    scrollBox:SetDataProvider(dataProvider)
     countText:SetText(string.format(L.BLACKLIST_COUNT or "%d item(s) blacklisted", count))
 end
 

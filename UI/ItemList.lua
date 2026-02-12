@@ -13,8 +13,7 @@ local ItemList = addon.ItemList
 local disenchantList = {}
 
 -- UI elements
-local scrollFrame, scrollChild
-local itemButtons = {}
+local scrollBox, scrollBar
 local countText
 local iconFrame, nextItemIcon, nextItemBorder
 local deButton
@@ -121,16 +120,93 @@ function ItemList:CreateCountText(parent)
     return countText
 end
 
-function ItemList:CreateScrollFrame(parent)
-    scrollFrame = CreateFrame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", 10, -160)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -30, 10)
+function ItemList:CreateScrollList(parent)
+    -- Inset background behind the scroll list
+    local inset = CreateFrame("Frame", nil, parent, "InsetFrameTemplate")
+    inset:SetPoint("TOPLEFT", 7, -155)
+    inset:SetPoint("BOTTOMRIGHT", -7, 5)
 
-    scrollChild = CreateFrame("Frame", nil, scrollFrame)
-    scrollChild:SetSize(260, 1)
-    scrollFrame:SetScrollChild(scrollChild)
+    -- Modern ScrollBox (inside the inset)
+    scrollBox = CreateFrame("Frame", nil, parent, "WowScrollBoxList")
+    scrollBox:SetPoint("TOPLEFT", inset, "TOPLEFT", 3, -3)
+    scrollBox:SetPoint("BOTTOMRIGHT", inset, "BOTTOMRIGHT", -3, 3)
 
-    return scrollFrame
+    -- Modern MinimalScrollBar
+    scrollBar = CreateFrame("EventFrame", nil, parent, "MinimalScrollBar")
+    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 4, 0)
+    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 4, 0)
+
+    -- Create linear view
+    local view = CreateScrollBoxListLinearView()
+    view:SetElementExtent(C.ITEM_ROW_HEIGHT)
+
+    -- Element initializer: configure each row when it becomes visible
+    view:SetElementInitializer("Button", function(btn, elementData)
+        btn:SetSize(scrollBox:GetWidth(), C.ITEM_ROW_HEIGHT - 2)
+
+        -- Background (create once)
+        if not btn.bg then
+            btn.bg = btn:CreateTexture(nil, "BACKGROUND")
+            btn.bg:SetAllPoints()
+            btn.bg:SetColorTexture(0.1, 0.1, 0.1, 0.5)
+
+            btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+
+            btn.icon = btn:CreateTexture(nil, "ARTWORK")
+            btn.icon:SetSize(32, 32)
+            btn.icon:SetPoint("LEFT", btn, "LEFT", 2, 0)
+
+            btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 8, 0)
+            btn.text:SetPoint("RIGHT", btn, "RIGHT", -5, 0)
+            btn.text:SetJustifyH("LEFT")
+            btn.text:SetWordWrap(false)
+        end
+
+        -- Configure with item data
+        btn.icon:SetTexture(elementData.icon)
+        btn.text:SetText(elementData.link)
+
+        btn.itemBag = elementData.bag
+        btn.itemSlot = elementData.slot
+        btn.itemID = elementData.itemID
+        btn.itemName = elementData.name
+        btn.itemLink = elementData.link
+
+        btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+        btn:SetScript("OnEnter", function(self)
+            local L = addon.currentLocale
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetBagItem(self.itemBag, self.itemSlot)
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine(L.BLACKLIST_HINT or "Right-click to blacklist", 0.7, 0.7, 0.7)
+            GameTooltip:Show()
+        end)
+        btn:SetScript("OnLeave", GameTooltip_Hide)
+
+        btn:SetScript("OnClick", function(self, button)
+            if InCombatLockdown() then return end
+
+            if button == "RightButton" then
+                if Blacklist and self.itemLink then
+                    Blacklist:Add(self.itemLink, self.itemName, self.itemID)
+                    ItemList:ScanBags()
+                end
+            else
+                for i, item in ipairs(disenchantList) do
+                    if item.bag == self.itemBag and item.slot == self.itemSlot then
+                        table.remove(disenchantList, i)
+                        table.insert(disenchantList, 1, item)
+                        break
+                    end
+                end
+                ItemList:UpdateDisenchantButton()
+            end
+        end)
+    end)
+
+    ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
 end
 
 function ItemList:UpdateDisenchantButton()
@@ -168,12 +244,6 @@ function ItemList:ScanBags()
     -- Clear list
     wipe(disenchantList)
 
-    -- Hide old buttons
-    for _, btn in ipairs(itemButtons) do
-        btn:Hide()
-    end
-
-    local yOffset = 0
     local count = 0
 
     for bag = 0, 4 do
@@ -189,7 +259,6 @@ function ItemList:ScanBags()
                 if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterButtons:IsQualityEnabled(quality) and not isBlacklisted then
                     count = count + 1
 
-                    -- Add to list
                     table.insert(disenchantList, {
                         bag = bag,
                         slot = slot,
@@ -199,90 +268,18 @@ function ItemList:ScanBags()
                         quality = quality,
                         itemID = info.itemID
                     })
-
-                    local btn = itemButtons[count]
-                    if not btn then
-                        btn = CreateFrame("Button", nil, scrollChild)
-                        btn:SetSize(260, 36)
-
-                        -- Background
-                        btn.bg = btn:CreateTexture(nil, "BACKGROUND")
-                        btn.bg:SetAllPoints()
-                        btn.bg:SetColorTexture(0.1, 0.1, 0.1, 0.5)
-
-                        -- Highlight
-                        btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
-
-                        -- Icon
-                        btn.icon = btn:CreateTexture(nil, "ARTWORK")
-                        btn.icon:SetSize(32, 32)
-                        btn.icon:SetPoint("LEFT", btn, "LEFT", 2, 0)
-
-                        -- Item name
-                        btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                        btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 8, 0)
-                        btn.text:SetPoint("RIGHT", btn, "RIGHT", -5, 0)
-                        btn.text:SetJustifyH("LEFT")
-                        btn.text:SetWordWrap(false)
-
-                        itemButtons[count] = btn
-                    end
-
-                    -- Configure button
-                    btn.icon:SetTexture(info.iconFileID)
-                    btn.text:SetText(info.hyperlink)
-                    btn:SetPoint("TOPLEFT", 0, -yOffset)
-                    btn:Show()
-
-                    -- Store data
-                    btn.itemBag = bag
-                    btn.itemSlot = slot
-                    btn.itemID = info.itemID
-                    btn.itemName = itemName
-                    btn.itemLink = info.hyperlink
-
-                    btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-
-                    btn:SetScript("OnEnter", function(self)
-                        local L = addon.currentLocale
-                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                        GameTooltip:SetBagItem(self.itemBag, self.itemSlot)
-                        GameTooltip:AddLine(" ")
-                        GameTooltip:AddLine(L.BLACKLIST_HINT or "Right-click to blacklist", 0.7, 0.7, 0.7)
-                        GameTooltip:Show()
-                    end)
-                    btn:SetScript("OnLeave", GameTooltip_Hide)
-
-                    -- Left-click to select, Right-click to blacklist
-                    btn:SetScript("OnClick", function(self, button)
-                        if InCombatLockdown() then return end
-
-                        if button == "RightButton" then
-                            -- Blacklist item (using full item link for unique identification)
-                            if Blacklist and self.itemLink then
-                                Blacklist:Add(self.itemLink, self.itemName, self.itemID)
-                                ItemList:ScanBags()
-                            end
-                        else
-                            -- Select item as next to disenchant
-                            for i, item in ipairs(disenchantList) do
-                                if item.bag == self.itemBag and item.slot == self.itemSlot then
-                                    table.remove(disenchantList, i)
-                                    table.insert(disenchantList, 1, item)
-                                    break
-                                end
-                            end
-                            ItemList:UpdateDisenchantButton()
-                        end
-                    end)
-
-                    yOffset = yOffset + C.ITEM_ROW_HEIGHT
                 end
             end
         end
     end
 
-    scrollChild:SetHeight(math.max(yOffset, 1))
+    -- Update ScrollBox with new data
+    local dataProvider = CreateDataProvider()
+    for _, item in ipairs(disenchantList) do
+        dataProvider:Insert(item)
+    end
+    scrollBox:SetDataProvider(dataProvider)
+
     countText:SetText(string.format(L.ITEMS_COUNT, count))
 
     -- Update disenchant button
@@ -293,7 +290,7 @@ function ItemList:Initialize(parent)
     self:CreateIconFrame(parent)
     self:CreateDisenchantButton(parent)
     self:CreateCountText(parent)
-    self:CreateScrollFrame(parent)
+    self:CreateScrollList(parent)
 
     -- Set filter callback
     FilterButtons:SetCallback(function()
