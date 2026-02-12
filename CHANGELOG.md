@@ -2,6 +2,12 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.2.2] - 2026-02-10
+
+### Fixed
+- Added combat lockdown protection to prevent errors when opening/closing frames during combat
+- Profession button now only shows on the Recipes tab (first tab) instead of all tabs
+
 ## [1.2.0] - 2025-02-09
 
 ### Added
