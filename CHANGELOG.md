@@ -2,6 +2,13 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.3.0] - 2026-02-10
+
+### Changed
+- Modernized scroll bars to use Blizzard's new MinimalScrollBar and ScrollBox system
+- Replaced legacy UIPanelScrollFrameTemplate with WowScrollBoxList and DataProvider pattern
+- Updated both item list and blacklist frame with modern scroll components
+
 ## [1.2.1] - 2025-02-10
 
 ### Fixed
