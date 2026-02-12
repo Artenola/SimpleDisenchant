@@ -78,6 +78,7 @@ function MainFrame:GetFrame()
 end
 
 function MainFrame:Show()
+    if InCombatLockdown() then return end
     if not frame then
         self:Create()
     end
@@ -85,12 +86,14 @@ function MainFrame:Show()
 end
 
 function MainFrame:Hide()
+    if InCombatLockdown() then return end
     if frame then
         frame:Hide()
     end
 end
 
 function MainFrame:Toggle()
+    if InCombatLockdown() then return end
     if frame and frame:IsShown() then
         self:Hide()
     else

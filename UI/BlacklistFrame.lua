@@ -187,6 +187,7 @@ function BlacklistFrame:Refresh()
 end
 
 function BlacklistFrame:Toggle()
+    if InCombatLockdown() then return end
     if not frame then
         self:Create()
     end
@@ -204,6 +205,7 @@ function BlacklistFrame:IsShown()
 end
 
 function BlacklistFrame:Show()
+    if InCombatLockdown() then return end
     if not frame then
         self:Create()
     end
@@ -212,6 +214,7 @@ function BlacklistFrame:Show()
 end
 
 function BlacklistFrame:Hide()
+    if InCombatLockdown() then return end
     if frame then
         frame:Hide()
     end

@@ -54,6 +54,7 @@ local function CreateButton()
     professionButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
     professionButton:SetScript("OnClick", function(self, button)
+        if InCombatLockdown() then return end
         if button == "RightButton" then
             -- Right-click: open blacklist
             addon.BlacklistFrame:Toggle()
@@ -79,22 +80,38 @@ local function CreateButton()
     professionButton:SetScript("OnLeave", GameTooltip_Hide)
 end
 
-local function OnProfessionsFrameShow()
-    -- Check if it's Enchanting (profession ID 333)
+local function IsEnchantingRecipesTab()
     local profInfo = C_TradeSkillUI.GetBaseProfessionInfo()
-    if profInfo and profInfo.professionID == C.ENCHANTING_PROFESSION_ID then
-        CreateButton()
-        if professionButton then
-            professionButton:Show()
-        end
-    elseif professionButton then
+    if not profInfo or profInfo.professionID ~= C.ENCHANTING_PROFESSION_ID then
+        return false
+    end
+    -- Only show on the first tab (Recipes)
+    local currentTab = ProfessionsFrame:GetTab()
+    return currentTab == ProfessionsFrame.recipesTabID
+end
+
+local function UpdateButtonVisibility()
+    if not professionButton then return end
+    if IsEnchantingRecipesTab() then
+        professionButton:Show()
+    else
         professionButton:Hide()
     end
+end
+
+local function OnProfessionsFrameShow()
+    if IsEnchantingRecipesTab() then
+        CreateButton()
+    end
+    UpdateButtonVisibility()
 end
 
 local function SetupProfessionsHook()
     if ProfessionsFrame then
         ProfessionsFrame:HookScript("OnShow", OnProfessionsFrameShow)
+        EventRegistry:RegisterCallback("ProfessionsFrame.TabSet", function()
+            UpdateButtonVisibility()
+        end)
     end
 end
 
