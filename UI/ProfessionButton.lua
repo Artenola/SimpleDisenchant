@@ -54,7 +54,10 @@ local function CreateButton()
     professionButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
     professionButton:SetScript("OnClick", function(self, button)
-        if InCombatLockdown() then return end
+        if InCombatLockdown() then
+            addon.Utils:Print(addon.currentLocale.COMBAT_WARNING)
+            return
+        end
         if button == "RightButton" then
             -- Right-click: open blacklist
             addon.BlacklistFrame:Toggle()
@@ -80,38 +83,42 @@ local function CreateButton()
     professionButton:SetScript("OnLeave", GameTooltip_Hide)
 end
 
-local function IsEnchantingRecipesTab()
+local function IsEnchanting()
     local profInfo = C_TradeSkillUI.GetBaseProfessionInfo()
-    if not profInfo or profInfo.professionID ~= C.ENCHANTING_PROFESSION_ID then
-        return false
-    end
-    -- Only show on the first tab (Recipes)
-    local currentTab = ProfessionsFrame:GetTab()
-    return currentTab == ProfessionsFrame.recipesTabID
+    return profInfo and profInfo.professionID == C.ENCHANTING_PROFESSION_ID
 end
 
-local function UpdateButtonVisibility()
+local function UpdateButtonVisibility(tabID)
     if not professionButton then return end
-    if IsEnchantingRecipesTab() then
-        professionButton:Show()
-    else
+    if not IsEnchanting() then
         professionButton:Hide()
+        return
+    end
+    -- Show only on Recipes tab
+    if tabID and ProfessionsFrame.recipesTabID then
+        if tabID == ProfessionsFrame.recipesTabID then
+            professionButton:Show()
+        else
+            professionButton:Hide()
+        end
+    else
+        professionButton:Show()
     end
 end
 
 local function OnProfessionsFrameShow()
-    if IsEnchantingRecipesTab() then
+    if IsEnchanting() then
         CreateButton()
     end
-    UpdateButtonVisibility()
 end
 
 local function SetupProfessionsHook()
     if ProfessionsFrame then
         ProfessionsFrame:HookScript("OnShow", OnProfessionsFrameShow)
-        EventRegistry:RegisterCallback("ProfessionsFrame.TabSet", function()
-            UpdateButtonVisibility()
-        end)
+        -- TabSet fires after SetTab with (ProfessionsFrame, tabID)
+        EventRegistry:RegisterCallback("ProfessionsFrame.TabSet", function(_, _, tabID)
+            UpdateButtonVisibility(tabID)
+        end, "SimpleDisenchantTabSet")
     end
 end
 

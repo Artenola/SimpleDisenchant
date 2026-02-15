@@ -10,7 +10,8 @@ A World of Warcraft addon that makes disenchanting items from your bags quick an
 - **Item selection**: Click any item in the list to set it as the next to disenchant
 - **Blacklist system**: Right-click items to blacklist them (they won't appear in the list anymore)
 - **Blacklist management**: View and manage your blacklist with `/sde blacklist` or right-click on the profession button
-- **Profession integration**: Button in Enchanting profession UI to quickly open SimpleDisenchant
+- **Profession integration**: Button in Enchanting profession UI (Recipes tab) to quickly open SimpleDisenchant
+- **Combat protection**: Addon is locked during combat with a visual overlay and warning message
 - **Tooltips**: Hover over items to see full item details
 - **Multi-language**: Supports English, French, German, Spanish, Italian, and Russian
 

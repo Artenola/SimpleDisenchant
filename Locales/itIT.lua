@@ -23,4 +23,6 @@ addon.L["itIT"] = {
     BLACKLIST_EMPTY = "Lista nera vuota",
     BLACKLIST_HELP = "Uso: /sde blacklist [clear]",
     BLACKLIST_OPEN_HINT = "Clic destro per lista nera",
+    COMBAT_WARNING = "Non disponibile in combattimento",
+    COMBAT_OVERLAY = "In combattimento...",
 }

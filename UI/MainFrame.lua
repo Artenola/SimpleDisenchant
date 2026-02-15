@@ -9,6 +9,7 @@ local MainFrame = addon.MainFrame
 
 -- Main frame reference
 local frame
+local combatOverlay
 
 function MainFrame:Create()
     if frame then return frame end
@@ -78,7 +79,10 @@ function MainFrame:GetFrame()
 end
 
 function MainFrame:Show()
-    if InCombatLockdown() then return end
+    if InCombatLockdown() then
+        Utils:Print(addon.currentLocale.COMBAT_WARNING)
+        return
+    end
     if not frame then
         self:Create()
     end
@@ -93,7 +97,10 @@ function MainFrame:Hide()
 end
 
 function MainFrame:Toggle()
-    if InCombatLockdown() then return end
+    if InCombatLockdown() then
+        Utils:Print(addon.currentLocale.COMBAT_WARNING)
+        return
+    end
     if frame and frame:IsShown() then
         self:Hide()
     else
@@ -103,4 +110,35 @@ end
 
 function MainFrame:IsShown()
     return frame and frame:IsShown()
+end
+
+function MainFrame:SetCombatMode(inCombat)
+    if not frame then return end
+
+    -- Create overlay on first use
+    if not combatOverlay then
+        combatOverlay = CreateFrame("Frame", nil, frame)
+        combatOverlay:SetAllPoints()
+        combatOverlay:SetFrameLevel(frame:GetFrameLevel() + 100)
+        combatOverlay:EnableMouse(true)
+
+        combatOverlay.bg = combatOverlay:CreateTexture(nil, "BACKGROUND")
+        combatOverlay.bg:SetAllPoints()
+        combatOverlay.bg:SetColorTexture(0, 0, 0, 0.6)
+
+        combatOverlay.text = combatOverlay:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+        combatOverlay.text:SetPoint("CENTER", 0, 0)
+        combatOverlay.text:SetTextColor(1, 0.3, 0.3, 1)
+
+        combatOverlay:Hide()
+    end
+
+    local L = addon.currentLocale
+    combatOverlay.text:SetText(L.COMBAT_OVERLAY)
+
+    if inCombat then
+        combatOverlay:Show()
+    else
+        combatOverlay:Hide()
+    end
 end
