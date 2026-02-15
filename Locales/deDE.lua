@@ -23,4 +23,6 @@ addon.L["deDE"] = {
     BLACKLIST_EMPTY = "Sperrliste ist leer",
     BLACKLIST_HELP = "Nutzung: /sde blacklist [clear]",
     BLACKLIST_OPEN_HINT = "Rechtsklick für Sperrliste",
+    COMBAT_WARNING = "Im Kampf nicht verfügbar",
+    COMBAT_OVERLAY = "Im Kampf...",
 }

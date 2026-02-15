@@ -28,6 +28,8 @@ L["enUS"] = {
     BLACKLIST_EMPTY = "Blacklist is empty",
     BLACKLIST_HELP = "Usage: /sde blacklist [clear]",
     BLACKLIST_OPEN_HINT = "Right-click for blacklist",
+    COMBAT_WARNING = "Not available in combat",
+    COMBAT_OVERLAY = "In combat...",
 }
 
 -- English GB uses same as US

@@ -187,7 +187,10 @@ function BlacklistFrame:Refresh()
 end
 
 function BlacklistFrame:Toggle()
-    if InCombatLockdown() then return end
+    if InCombatLockdown() then
+        addon.Utils:Print(addon.currentLocale.COMBAT_WARNING)
+        return
+    end
     if not frame then
         self:Create()
     end
@@ -205,7 +208,10 @@ function BlacklistFrame:IsShown()
 end
 
 function BlacklistFrame:Show()
-    if InCombatLockdown() then return end
+    if InCombatLockdown() then
+        addon.Utils:Print(addon.currentLocale.COMBAT_WARNING)
+        return
+    end
     if not frame then
         self:Create()
     end

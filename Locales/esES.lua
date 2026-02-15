@@ -23,6 +23,8 @@ addon.L["esES"] = {
     BLACKLIST_EMPTY = "Lista negra vacía",
     BLACKLIST_HELP = "Uso: /sde blacklist [clear]",
     BLACKLIST_OPEN_HINT = "Clic derecho para lista negra",
+    COMBAT_WARNING = "No disponible en combate",
+    COMBAT_OVERLAY = "En combate...",
 }
 
 -- Latin American Spanish uses same as European Spanish
