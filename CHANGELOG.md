@@ -2,12 +2,19 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
-## [1.3.0] - 2026-02-10
+## [1.3.0] - 2026-02-15
+
+### Added
+- Custom arcane-themed disenchant button texture with 4 states (normal, hover, pressed, disabled)
+- Dark background for item list and blacklist list matching Blizzard's profession recipe list style
+- Inset border (NineSlice) around scroll lists for polished look
 
 ### Changed
 - Modernized scroll bars to use Blizzard's new MinimalScrollBar and ScrollBox system
 - Replaced legacy UIPanelScrollFrameTemplate with WowScrollBoxList and DataProvider pattern
 - Updated both item list and blacklist frame with modern scroll components
+- Disenchant button now uses custom texture strip with proper state management
+- Blacklist chat messages now display clickable item links instead of plain text names
 
 ## [1.2.1] - 2025-02-10
 

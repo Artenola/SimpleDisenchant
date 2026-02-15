@@ -68,35 +68,70 @@ end
 function ItemList:CreateDisenchantButton(parent)
     local L = addon.currentLocale
 
-    -- Disenchant button (SecureActionButton)
+    -- Custom button texture path (1024x64 strip: Normal | Hover | Pushed | Disabled)
+    local BTN_TEXTURE = "Interface\\AddOns\\SimpleDisenchant\\media\\DeButton"
+
+    -- TexCoords for each state in the horizontal strip
+    local COORDS_NORMAL   = { 0,    0.25, 0, 1 }
+    local COORDS_HIGHLIGHT = { 0.25, 0.5,  0, 1 }
+    local COORDS_PUSHED   = { 0.5,  0.75, 0, 1 }
+    local COORDS_DISABLED = { 0.75, 1,    0, 1 }
+
+    -- Disenchant button (SecureActionButton for macro execution)
     deButton = CreateFrame("Button", "SimpleDisenchantButton", parent, "SecureActionButtonTemplate")
     deButton:SetSize(230, 40)
     deButton:SetPoint("LEFT", iconFrame, "RIGHT", 10, 0)
     deButton:RegisterForClicks("LeftButtonUp", "LeftButtonDown")
 
-    -- Button textures
-    deButton.ntex = deButton:CreateTexture()
-    deButton.ntex:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
-    deButton.ntex:SetTexCoord(0, 0.625, 0, 0.6875)
-    deButton.ntex:SetAllPoints()
-    deButton:SetNormalTexture(deButton.ntex)
+    -- Background texture (shows current state)
+    deButton.bg = deButton:CreateTexture(nil, "BACKGROUND")
+    deButton.bg:SetAllPoints()
+    deButton.bg:SetTexture(BTN_TEXTURE)
+    deButton.bg:SetTexCoord(unpack(COORDS_NORMAL))
 
-    deButton.htex = deButton:CreateTexture()
-    deButton.htex:SetTexture("Interface\\Buttons\\UI-Panel-Button-Highlight")
-    deButton.htex:SetTexCoord(0, 0.625, 0, 0.6875)
-    deButton.htex:SetAllPoints()
-    deButton:SetHighlightTexture(deButton.htex)
-
-    deButton.ptex = deButton:CreateTexture()
-    deButton.ptex:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
-    deButton.ptex:SetTexCoord(0, 0.625, 0, 0.6875)
-    deButton.ptex:SetAllPoints()
-    deButton:SetPushedTexture(deButton.ptex)
+    -- Highlight overlay (hover state, blended on top)
+    local htex = deButton:CreateTexture(nil, "HIGHLIGHT")
+    htex:SetAllPoints()
+    htex:SetTexture(BTN_TEXTURE)
+    htex:SetTexCoord(unpack(COORDS_HIGHLIGHT))
+    htex:SetBlendMode("ADD")
+    deButton:SetHighlightTexture(htex)
 
     -- Button text
     deButton.text = deButton:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    deButton.text:SetAllPoints(deButton)
+    deButton.text:SetPoint("CENTER")
     deButton.text:SetText(L.DISENCHANT)
+
+    -- State scripts (swap TexCoords on the background texture)
+    deButton:HookScript("OnMouseDown", function(self)
+        if self:IsEnabled() then
+            self.bg:SetTexCoord(unpack(COORDS_PUSHED))
+        end
+    end)
+
+    deButton:HookScript("OnMouseUp", function(self)
+        if self:IsEnabled() then
+            self.bg:SetTexCoord(unpack(COORDS_NORMAL))
+        end
+    end)
+
+    deButton:HookScript("OnShow", function(self)
+        if self:IsEnabled() then
+            self.bg:SetTexCoord(unpack(COORDS_NORMAL))
+        else
+            self.bg:SetTexCoord(unpack(COORDS_DISABLED))
+        end
+    end)
+
+    deButton:HookScript("OnEnable", function(self)
+        self.bg:SetTexCoord(unpack(COORDS_NORMAL))
+        self.text:SetFontObject("GameFontNormalLarge")
+    end)
+
+    deButton:HookScript("OnDisable", function(self)
+        self.bg:SetTexCoord(unpack(COORDS_DISABLED))
+        self.text:SetFontObject("GameFontDisableLarge")
+    end)
 
     -- Configure as macro
     deButton:SetAttribute("type", "macro")
@@ -121,20 +156,30 @@ function ItemList:CreateCountText(parent)
 end
 
 function ItemList:CreateScrollList(parent)
-    -- Inset background behind the scroll list
-    local inset = CreateFrame("Frame", nil, parent, "InsetFrameTemplate")
-    inset:SetPoint("TOPLEFT", 7, -155)
-    inset:SetPoint("BOTTOMRIGHT", -7, 5)
+    -- Container for the scroll list (matches Blizzard recipe list style)
+    local listContainer = CreateFrame("Frame", nil, parent)
+    listContainer:SetPoint("TOPLEFT", 7, -155)
+    listContainer:SetPoint("BOTTOMRIGHT", -7, 5)
 
-    -- Modern ScrollBox (inside the inset)
-    scrollBox = CreateFrame("Frame", nil, parent, "WowScrollBoxList")
-    scrollBox:SetPoint("TOPLEFT", inset, "TOPLEFT", 3, -3)
-    scrollBox:SetPoint("BOTTOMRIGHT", inset, "BOTTOMRIGHT", -3, 3)
+    -- Dark background (same atlas as Blizzard recipe list)
+    listContainer.bg = listContainer:CreateTexture(nil, "BACKGROUND")
+    listContainer.bg:SetAllPoints()
+    listContainer.bg:SetAtlas("Professions-background-summarylist")
+
+    -- Inset border (NineSlice frame)
+    local inset = CreateFrame("Frame", nil, listContainer, "NineSlicePanelTemplate")
+    inset:SetAllPoints()
+    NineSliceUtil.ApplyLayoutByName(inset, "InsetFrameTemplate")
+
+    -- Modern ScrollBox (inside the container)
+    scrollBox = CreateFrame("Frame", nil, listContainer, "WowScrollBoxList")
+    scrollBox:SetPoint("TOPLEFT", listContainer, "TOPLEFT", 6, -3)
+    scrollBox:SetPoint("BOTTOMRIGHT", listContainer, "BOTTOMRIGHT", -20, 5)
 
     -- Modern MinimalScrollBar
-    scrollBar = CreateFrame("EventFrame", nil, parent, "MinimalScrollBar")
-    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 4, 0)
-    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 4, 0)
+    scrollBar = CreateFrame("EventFrame", nil, listContainer, "MinimalScrollBar")
+    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 0, 0)
+    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 0, 0)
 
     -- Create linear view
     local view = CreateScrollBoxListLinearView()
@@ -220,7 +265,6 @@ function ItemList:UpdateDisenchantButton()
         deButton:SetAttribute("macrotext", macroText)
         deButton.text:SetText(L.DISENCHANT)
         deButton:Enable()
-        deButton:SetAlpha(1)
 
         -- Update icon
         nextItemIcon:SetTexture(firstItem.icon)
@@ -233,7 +277,6 @@ function ItemList:UpdateDisenchantButton()
         deButton:SetAttribute("macrotext", "")
         deButton.text:SetText(L.NO_ITEM)
         deButton:Disable()
-        deButton:SetAlpha(0.5)
         iconFrame:Hide()
     end
 end

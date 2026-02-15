@@ -72,7 +72,7 @@ function Blacklist:Add(itemLink, itemName, itemID)
     end
 
     local L = addon.currentLocale
-    addon.Utils:Print(string.format(L.BLACKLIST_ADDED or "%s added to blacklist", itemName or key))
+    addon.Utils:Print(string.format(L.BLACKLIST_ADDED or "%s added to blacklist", itemLink or itemName or key))
 
     -- Refresh blacklist frame if open
     if addon.BlacklistFrame and addon.BlacklistFrame:IsShown() then
@@ -85,7 +85,9 @@ end
 function Blacklist:Remove(key)
     if not key or not blacklistedItems[key] then return false end
 
-    local itemName = blacklistedItems[key].name
+    local data = blacklistedItems[key]
+    local itemLink = data.link
+    local itemName = data.name
     blacklistedItems[key] = nil
 
     -- Ensure it's saved to DB
@@ -94,7 +96,7 @@ function Blacklist:Remove(key)
     end
 
     local L = addon.currentLocale
-    addon.Utils:Print(string.format(L.BLACKLIST_REMOVED or "%s removed from blacklist", itemName or key))
+    addon.Utils:Print(string.format(L.BLACKLIST_REMOVED or "%s removed from blacklist", itemLink or itemName or key))
 
     -- Refresh blacklist frame if open
     if addon.BlacklistFrame and addon.BlacklistFrame:IsShown() then
