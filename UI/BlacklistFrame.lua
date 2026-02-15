@@ -53,20 +53,30 @@ function BlacklistFrame:Create()
         end
     end)
 
-    -- Inset background behind the scroll list
-    local inset = CreateFrame("Frame", nil, frame, "InsetFrameTemplate")
-    inset:SetPoint("TOPLEFT", 7, -80)
-    inset:SetPoint("BOTTOMRIGHT", -7, 5)
+    -- Container for the scroll list (matches Blizzard recipe list style)
+    local listContainer = CreateFrame("Frame", nil, frame)
+    listContainer:SetPoint("TOPLEFT", 7, -80)
+    listContainer:SetPoint("BOTTOMRIGHT", -7, 5)
 
-    -- Modern ScrollBox (inside the inset)
-    scrollBox = CreateFrame("Frame", nil, frame, "WowScrollBoxList")
-    scrollBox:SetPoint("TOPLEFT", inset, "TOPLEFT", 3, -3)
-    scrollBox:SetPoint("BOTTOMRIGHT", inset, "BOTTOMRIGHT", -3, 3)
+    -- Dark background (same atlas as Blizzard recipe list)
+    listContainer.bg = listContainer:CreateTexture(nil, "BACKGROUND")
+    listContainer.bg:SetAllPoints()
+    listContainer.bg:SetAtlas("Professions-background-summarylist")
+
+    -- Inset border (NineSlice frame)
+    local inset = CreateFrame("Frame", nil, listContainer, "NineSlicePanelTemplate")
+    inset:SetAllPoints()
+    NineSliceUtil.ApplyLayoutByName(inset, "InsetFrameTemplate")
+
+    -- Modern ScrollBox (inside the container)
+    scrollBox = CreateFrame("Frame", nil, listContainer, "WowScrollBoxList")
+    scrollBox:SetPoint("TOPLEFT", listContainer, "TOPLEFT", 6, -3)
+    scrollBox:SetPoint("BOTTOMRIGHT", listContainer, "BOTTOMRIGHT", -20, 5)
 
     -- Modern MinimalScrollBar
-    scrollBar = CreateFrame("EventFrame", nil, frame, "MinimalScrollBar")
-    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 4, 0)
-    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 4, 0)
+    scrollBar = CreateFrame("EventFrame", nil, listContainer, "MinimalScrollBar")
+    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 0, 0)
+    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 0, 0)
 
     -- Create linear view
     local view = CreateScrollBoxListLinearView()
