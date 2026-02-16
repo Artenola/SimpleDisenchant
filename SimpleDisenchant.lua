@@ -33,9 +33,21 @@ local function Initialize()
     -- Register events
     frame:RegisterEvent("BAG_UPDATE_DELAYED")
     frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    frame:RegisterEvent("PLAYER_REGEN_DISABLED")
     frame:SetScript("OnEvent", function(self, event)
-        if MainFrame:IsShown() and not InCombatLockdown() then
-            ItemList:ScanBags()
+        if event == "PLAYER_REGEN_DISABLED" then
+            -- Entering combat: show overlay on visible frames
+            MainFrame:SetCombatMode(true)
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            -- Leaving combat: remove overlay and refresh
+            MainFrame:SetCombatMode(false)
+            if MainFrame:IsShown() then
+                ItemList:ScanBags()
+            end
+        elseif event == "BAG_UPDATE_DELAYED" then
+            if MainFrame:IsShown() and not InCombatLockdown() then
+                ItemList:ScanBags()
+            end
         end
     end)
 end

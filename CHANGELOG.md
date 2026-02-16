@@ -2,6 +2,16 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.2.2] - 2026-02-12
+
+### Added
+- Combat warning message when trying to use the addon during combat
+- Combat overlay on the main frame when entering combat (grayed out interface with "In combat..." text)
+
+### Fixed
+- Added combat lockdown protection to prevent errors when opening/closing frames during combat
+- Profession button now only shows on the Recipes tab (first tab) instead of all tabs
+
 ## [1.2.1] - 2025-02-10
 
 ### Fixed

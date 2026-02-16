@@ -23,4 +23,6 @@ addon.L["ruRU"] = {
     BLACKLIST_EMPTY = "Черный список пуст",
     BLACKLIST_HELP = "Исп.: /sde blacklist [clear]",
     BLACKLIST_OPEN_HINT = "ПКМ для черного списка",
+    COMBAT_WARNING = "Недоступно в бою",
+    COMBAT_OVERLAY = "В бою...",
 }
