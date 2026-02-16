@@ -17,6 +17,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check CHANGELOG for version (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md does not contain an entry for version $VERSION"
+            echo "Please add a section '## [$VERSION] - YYYY-MM-DD' to CHANGELOG.md before creating a release."
+            exit 1
+          fi
+          echo "CHANGELOG.md contains entry for version $VERSION"
+
       - name: Set release type
         id: release_type
         run: |
