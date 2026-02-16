@@ -16,7 +16,6 @@ All notable changes to SimpleDisenchant will be documented in this file.
 - Disenchant button now uses custom texture strip with proper state management
 - Blacklist chat messages now display clickable item links instead of plain text names
 
-
 ## [1.2.2] - 2026-02-12
 
 ### Added
