@@ -23,4 +23,6 @@ addon.L["frFR"] = {
     BLACKLIST_EMPTY = "Liste noire vide",
     BLACKLIST_HELP = "Usage: /sde blacklist [clear]",
     BLACKLIST_OPEN_HINT = "Clic droit pour la liste noire",
+    COMBAT_WARNING = "Indisponible en combat",
+    COMBAT_OVERLAY = "En combat...",
 }
