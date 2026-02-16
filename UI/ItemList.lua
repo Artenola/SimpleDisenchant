@@ -13,8 +13,7 @@ local ItemList = addon.ItemList
 local disenchantList = {}
 
 -- UI elements
-local scrollFrame, scrollChild
-local itemButtons = {}
+local scrollBox, scrollBar
 local countText
 local iconFrame, nextItemIcon, nextItemBorder
 local deButton
@@ -69,35 +68,70 @@ end
 function ItemList:CreateDisenchantButton(parent)
     local L = addon.currentLocale
 
-    -- Disenchant button (SecureActionButton)
+    -- Custom button texture path (1024x64 strip: Normal | Hover | Pushed | Disabled)
+    local BTN_TEXTURE = "Interface\\AddOns\\SimpleDisenchant\\media\\DeButton"
+
+    -- TexCoords for each state in the horizontal strip
+    local COORDS_NORMAL   = { 0,    0.25, 0, 1 }
+    local COORDS_HIGHLIGHT = { 0.25, 0.5,  0, 1 }
+    local COORDS_PUSHED   = { 0.5,  0.75, 0, 1 }
+    local COORDS_DISABLED = { 0.75, 1,    0, 1 }
+
+    -- Disenchant button (SecureActionButton for macro execution)
     deButton = CreateFrame("Button", "SimpleDisenchantButton", parent, "SecureActionButtonTemplate")
     deButton:SetSize(230, 40)
     deButton:SetPoint("LEFT", iconFrame, "RIGHT", 10, 0)
     deButton:RegisterForClicks("LeftButtonUp", "LeftButtonDown")
 
-    -- Button textures
-    deButton.ntex = deButton:CreateTexture()
-    deButton.ntex:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
-    deButton.ntex:SetTexCoord(0, 0.625, 0, 0.6875)
-    deButton.ntex:SetAllPoints()
-    deButton:SetNormalTexture(deButton.ntex)
+    -- Background texture (shows current state)
+    deButton.bg = deButton:CreateTexture(nil, "BACKGROUND")
+    deButton.bg:SetAllPoints()
+    deButton.bg:SetTexture(BTN_TEXTURE)
+    deButton.bg:SetTexCoord(unpack(COORDS_NORMAL))
 
-    deButton.htex = deButton:CreateTexture()
-    deButton.htex:SetTexture("Interface\\Buttons\\UI-Panel-Button-Highlight")
-    deButton.htex:SetTexCoord(0, 0.625, 0, 0.6875)
-    deButton.htex:SetAllPoints()
-    deButton:SetHighlightTexture(deButton.htex)
-
-    deButton.ptex = deButton:CreateTexture()
-    deButton.ptex:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
-    deButton.ptex:SetTexCoord(0, 0.625, 0, 0.6875)
-    deButton.ptex:SetAllPoints()
-    deButton:SetPushedTexture(deButton.ptex)
+    -- Highlight overlay (hover state, blended on top)
+    local htex = deButton:CreateTexture(nil, "HIGHLIGHT")
+    htex:SetAllPoints()
+    htex:SetTexture(BTN_TEXTURE)
+    htex:SetTexCoord(unpack(COORDS_HIGHLIGHT))
+    htex:SetBlendMode("ADD")
+    deButton:SetHighlightTexture(htex)
 
     -- Button text
     deButton.text = deButton:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    deButton.text:SetAllPoints(deButton)
+    deButton.text:SetPoint("CENTER")
     deButton.text:SetText(L.DISENCHANT)
+
+    -- State scripts (swap TexCoords on the background texture)
+    deButton:HookScript("OnMouseDown", function(self)
+        if self:IsEnabled() then
+            self.bg:SetTexCoord(unpack(COORDS_PUSHED))
+        end
+    end)
+
+    deButton:HookScript("OnMouseUp", function(self)
+        if self:IsEnabled() then
+            self.bg:SetTexCoord(unpack(COORDS_NORMAL))
+        end
+    end)
+
+    deButton:HookScript("OnShow", function(self)
+        if self:IsEnabled() then
+            self.bg:SetTexCoord(unpack(COORDS_NORMAL))
+        else
+            self.bg:SetTexCoord(unpack(COORDS_DISABLED))
+        end
+    end)
+
+    deButton:HookScript("OnEnable", function(self)
+        self.bg:SetTexCoord(unpack(COORDS_NORMAL))
+        self.text:SetFontObject("GameFontNormalLarge")
+    end)
+
+    deButton:HookScript("OnDisable", function(self)
+        self.bg:SetTexCoord(unpack(COORDS_DISABLED))
+        self.text:SetFontObject("GameFontDisableLarge")
+    end)
 
     -- Configure as macro
     deButton:SetAttribute("type", "macro")
@@ -121,16 +155,103 @@ function ItemList:CreateCountText(parent)
     return countText
 end
 
-function ItemList:CreateScrollFrame(parent)
-    scrollFrame = CreateFrame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", 10, -160)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -30, 10)
+function ItemList:CreateScrollList(parent)
+    -- Container for the scroll list (matches Blizzard recipe list style)
+    local listContainer = CreateFrame("Frame", nil, parent)
+    listContainer:SetPoint("TOPLEFT", 7, -155)
+    listContainer:SetPoint("BOTTOMRIGHT", -7, 5)
 
-    scrollChild = CreateFrame("Frame", nil, scrollFrame)
-    scrollChild:SetSize(260, 1)
-    scrollFrame:SetScrollChild(scrollChild)
+    -- Dark background (same atlas as Blizzard recipe list)
+    listContainer.bg = listContainer:CreateTexture(nil, "BACKGROUND")
+    listContainer.bg:SetAllPoints()
+    listContainer.bg:SetAtlas("Professions-background-summarylist")
 
-    return scrollFrame
+    -- Inset border (NineSlice frame)
+    local inset = CreateFrame("Frame", nil, listContainer, "NineSlicePanelTemplate")
+    inset:SetAllPoints()
+    NineSliceUtil.ApplyLayoutByName(inset, "InsetFrameTemplate")
+
+    -- Modern ScrollBox (inside the container)
+    scrollBox = CreateFrame("Frame", nil, listContainer, "WowScrollBoxList")
+    scrollBox:SetPoint("TOPLEFT", listContainer, "TOPLEFT", 6, -3)
+    scrollBox:SetPoint("BOTTOMRIGHT", listContainer, "BOTTOMRIGHT", -20, 5)
+
+    -- Modern MinimalScrollBar
+    scrollBar = CreateFrame("EventFrame", nil, listContainer, "MinimalScrollBar")
+    scrollBar:SetPoint("TOPLEFT", scrollBox, "TOPRIGHT", 0, 0)
+    scrollBar:SetPoint("BOTTOMLEFT", scrollBox, "BOTTOMRIGHT", 0, 0)
+
+    -- Create linear view
+    local view = CreateScrollBoxListLinearView()
+    view:SetElementExtent(C.ITEM_ROW_HEIGHT)
+
+    -- Element initializer: configure each row when it becomes visible
+    view:SetElementInitializer("Button", function(btn, elementData)
+        btn:SetSize(scrollBox:GetWidth(), C.ITEM_ROW_HEIGHT - 2)
+
+        -- Background (create once)
+        if not btn.bg then
+            btn.bg = btn:CreateTexture(nil, "BACKGROUND")
+            btn.bg:SetAllPoints()
+            btn.bg:SetColorTexture(0.1, 0.1, 0.1, 0.5)
+
+            btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+
+            btn.icon = btn:CreateTexture(nil, "ARTWORK")
+            btn.icon:SetSize(32, 32)
+            btn.icon:SetPoint("LEFT", btn, "LEFT", 2, 0)
+
+            btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 8, 0)
+            btn.text:SetPoint("RIGHT", btn, "RIGHT", -5, 0)
+            btn.text:SetJustifyH("LEFT")
+            btn.text:SetWordWrap(false)
+        end
+
+        -- Configure with item data
+        btn.icon:SetTexture(elementData.icon)
+        btn.text:SetText(elementData.link)
+
+        btn.itemBag = elementData.bag
+        btn.itemSlot = elementData.slot
+        btn.itemID = elementData.itemID
+        btn.itemName = elementData.name
+        btn.itemLink = elementData.link
+
+        btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+        btn:SetScript("OnEnter", function(self)
+            local L = addon.currentLocale
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetBagItem(self.itemBag, self.itemSlot)
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine(L.BLACKLIST_HINT or "Right-click to blacklist", 0.7, 0.7, 0.7)
+            GameTooltip:Show()
+        end)
+        btn:SetScript("OnLeave", GameTooltip_Hide)
+
+        btn:SetScript("OnClick", function(self, button)
+            if InCombatLockdown() then return end
+
+            if button == "RightButton" then
+                if Blacklist and self.itemLink then
+                    Blacklist:Add(self.itemLink, self.itemName, self.itemID)
+                    ItemList:ScanBags()
+                end
+            else
+                for i, item in ipairs(disenchantList) do
+                    if item.bag == self.itemBag and item.slot == self.itemSlot then
+                        table.remove(disenchantList, i)
+                        table.insert(disenchantList, 1, item)
+                        break
+                    end
+                end
+                ItemList:UpdateDisenchantButton()
+            end
+        end)
+    end)
+
+    ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
 end
 
 function ItemList:UpdateDisenchantButton()
@@ -144,7 +265,6 @@ function ItemList:UpdateDisenchantButton()
         deButton:SetAttribute("macrotext", macroText)
         deButton.text:SetText(L.DISENCHANT)
         deButton:Enable()
-        deButton:SetAlpha(1)
 
         -- Update icon
         nextItemIcon:SetTexture(firstItem.icon)
@@ -157,7 +277,6 @@ function ItemList:UpdateDisenchantButton()
         deButton:SetAttribute("macrotext", "")
         deButton.text:SetText(L.NO_ITEM)
         deButton:Disable()
-        deButton:SetAlpha(0.5)
         iconFrame:Hide()
     end
 end
@@ -168,12 +287,6 @@ function ItemList:ScanBags()
     -- Clear list
     wipe(disenchantList)
 
-    -- Hide old buttons
-    for _, btn in ipairs(itemButtons) do
-        btn:Hide()
-    end
-
-    local yOffset = 0
     local count = 0
 
     for bag = 0, 4 do
@@ -189,7 +302,6 @@ function ItemList:ScanBags()
                 if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterButtons:IsQualityEnabled(quality) and not isBlacklisted then
                     count = count + 1
 
-                    -- Add to list
                     table.insert(disenchantList, {
                         bag = bag,
                         slot = slot,
@@ -199,90 +311,18 @@ function ItemList:ScanBags()
                         quality = quality,
                         itemID = info.itemID
                     })
-
-                    local btn = itemButtons[count]
-                    if not btn then
-                        btn = CreateFrame("Button", nil, scrollChild)
-                        btn:SetSize(260, 36)
-
-                        -- Background
-                        btn.bg = btn:CreateTexture(nil, "BACKGROUND")
-                        btn.bg:SetAllPoints()
-                        btn.bg:SetColorTexture(0.1, 0.1, 0.1, 0.5)
-
-                        -- Highlight
-                        btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
-
-                        -- Icon
-                        btn.icon = btn:CreateTexture(nil, "ARTWORK")
-                        btn.icon:SetSize(32, 32)
-                        btn.icon:SetPoint("LEFT", btn, "LEFT", 2, 0)
-
-                        -- Item name
-                        btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                        btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 8, 0)
-                        btn.text:SetPoint("RIGHT", btn, "RIGHT", -5, 0)
-                        btn.text:SetJustifyH("LEFT")
-                        btn.text:SetWordWrap(false)
-
-                        itemButtons[count] = btn
-                    end
-
-                    -- Configure button
-                    btn.icon:SetTexture(info.iconFileID)
-                    btn.text:SetText(info.hyperlink)
-                    btn:SetPoint("TOPLEFT", 0, -yOffset)
-                    btn:Show()
-
-                    -- Store data
-                    btn.itemBag = bag
-                    btn.itemSlot = slot
-                    btn.itemID = info.itemID
-                    btn.itemName = itemName
-                    btn.itemLink = info.hyperlink
-
-                    btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-
-                    btn:SetScript("OnEnter", function(self)
-                        local L = addon.currentLocale
-                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                        GameTooltip:SetBagItem(self.itemBag, self.itemSlot)
-                        GameTooltip:AddLine(" ")
-                        GameTooltip:AddLine(L.BLACKLIST_HINT or "Right-click to blacklist", 0.7, 0.7, 0.7)
-                        GameTooltip:Show()
-                    end)
-                    btn:SetScript("OnLeave", GameTooltip_Hide)
-
-                    -- Left-click to select, Right-click to blacklist
-                    btn:SetScript("OnClick", function(self, button)
-                        if InCombatLockdown() then return end
-
-                        if button == "RightButton" then
-                            -- Blacklist item (using full item link for unique identification)
-                            if Blacklist and self.itemLink then
-                                Blacklist:Add(self.itemLink, self.itemName, self.itemID)
-                                ItemList:ScanBags()
-                            end
-                        else
-                            -- Select item as next to disenchant
-                            for i, item in ipairs(disenchantList) do
-                                if item.bag == self.itemBag and item.slot == self.itemSlot then
-                                    table.remove(disenchantList, i)
-                                    table.insert(disenchantList, 1, item)
-                                    break
-                                end
-                            end
-                            ItemList:UpdateDisenchantButton()
-                        end
-                    end)
-
-                    yOffset = yOffset + C.ITEM_ROW_HEIGHT
                 end
             end
         end
     end
 
-    scrollChild:SetHeight(math.max(yOffset, 1))
+    -- Update ScrollBox with new data
+    local dataProvider = CreateDataProvider()
+    for _, item in ipairs(disenchantList) do
+        dataProvider:Insert(item)
+    end
+    scrollBox:SetDataProvider(dataProvider)
+
     countText:SetText(string.format(L.ITEMS_COUNT, count))
 
     -- Update disenchant button
@@ -293,7 +333,7 @@ function ItemList:Initialize(parent)
     self:CreateIconFrame(parent)
     self:CreateDisenchantButton(parent)
     self:CreateCountText(parent)
-    self:CreateScrollFrame(parent)
+    self:CreateScrollList(parent)
 
     -- Set filter callback
     FilterButtons:SetCallback(function()
