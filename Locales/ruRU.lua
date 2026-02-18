@@ -1,6 +1,12 @@
 -- SimpleDisenchant Russian Localization
 local addonName, addon = ...
 
+-- Keybinding labels (WoW global strings for the Keybindings UI)
+if GetLocale() == "ruRU" then
+    _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
+    _G.BINDING_NAME_SDEBTN = "Распылить следующий предмет"
+end
+
 addon.L["ruRU"] = {
     TITLE = "Simple Disenchant",
     DISENCHANT = "Распылить",

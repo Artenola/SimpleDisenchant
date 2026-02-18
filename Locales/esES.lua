@@ -1,6 +1,12 @@
 -- SimpleDisenchant Spanish Localization
 local addonName, addon = ...
 
+-- Keybinding labels (WoW global strings for the Keybindings UI)
+if GetLocale() == "esES" or GetLocale() == "esMX" then
+    _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
+    _G.BINDING_NAME_SDEBTN = "Desencantar siguiente objeto"
+end
+
 addon.L["esES"] = {
     TITLE = "Simple Disenchant",
     DISENCHANT = "Desencantar",

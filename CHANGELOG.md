@@ -2,6 +2,13 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- Keybinding support: assign a shortcut to the disenchant button via WoW's Key Bindings UI (Escape > Key Bindings > Simple Disenchant)
+- Keybinding labels localized in EN, FR, DE, ES, IT, RU
+- Updated install.ps1 and install.sh to include Bindings.xml and all addon folders
+
 ## [1.3.0] - 2026-02-15
 
 ### Added

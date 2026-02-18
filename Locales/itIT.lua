@@ -1,6 +1,12 @@
 -- SimpleDisenchant Italian Localization
 local addonName, addon = ...
 
+-- Keybinding labels (WoW global strings for the Keybindings UI)
+if GetLocale() == "itIT" then
+    _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
+    _G.BINDING_NAME_SDEBTN = "Disincanta il prossimo oggetto"
+end
+
 addon.L["itIT"] = {
     TITLE = "Simple Disenchant",
     DISENCHANT = "Disincantare",

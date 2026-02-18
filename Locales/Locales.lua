@@ -35,6 +35,10 @@ L["enUS"] = {
 -- English GB uses same as US
 L["enGB"] = L["enUS"]
 
+-- Keybinding labels (WoW global strings for the Keybindings UI)
+_G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
+_G.BINDING_NAME_SDEBTN = "Disenchant next item"
+
 -- Store player locale for later use
 addon.playerLocale = GetLocale()
 

@@ -1,6 +1,12 @@
 -- SimpleDisenchant German Localization
 local addonName, addon = ...
 
+-- Keybinding labels (WoW global strings for the Keybindings UI)
+if GetLocale() == "deDE" then
+    _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
+    _G.BINDING_NAME_SDEBTN = "Nächsten Gegenstand entzaubern"
+end
+
 addon.L["deDE"] = {
     TITLE = "Simple Disenchant",
     DISENCHANT = "Entzaubern",
