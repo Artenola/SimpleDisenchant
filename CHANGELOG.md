@@ -2,7 +2,7 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
-## [Unreleased]
+## [1.4.0] - 2026-02-18
 
 ### Added
 - Keybinding support: assign a shortcut to the disenchant button via WoW's Key Bindings UI (Escape > Key Bindings > Simple Disenchant)
