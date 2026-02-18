@@ -24,7 +24,6 @@ function BlacklistFrame:Create()
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-    frame:SetFrameStrata("HIGH")
 
     -- Title
     frame:SetTitle(L.BLACKLIST_TITLE or "Blacklist")

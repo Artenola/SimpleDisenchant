@@ -30,12 +30,25 @@ local function Initialize()
     -- Initialize profession button
     ProfessionButton:Initialize()
 
+    -- Apply keybinding to disenchant button
+    local function ApplyKeybinding()
+        local key = GetBindingKey("SDEBTN")
+        ClearOverrideBindings(SimpleDisenchantButton)
+        if key then
+            SetOverrideBindingClick(SimpleDisenchantButton, true, key, "SimpleDisenchantButton", "LeftButton")
+        end
+    end
+
     -- Register events
     frame:RegisterEvent("BAG_UPDATE_DELAYED")
     frame:RegisterEvent("PLAYER_REGEN_ENABLED")
     frame:RegisterEvent("PLAYER_REGEN_DISABLED")
+    frame:RegisterEvent("UPDATE_BINDINGS")
+    frame:RegisterEvent("PLAYER_LOGIN")
     frame:SetScript("OnEvent", function(self, event)
-        if event == "PLAYER_REGEN_DISABLED" then
+        if event == "PLAYER_LOGIN" or event == "UPDATE_BINDINGS" then
+            ApplyKeybinding()
+        elseif event == "PLAYER_REGEN_DISABLED" then
             -- Entering combat: show overlay on visible frames
             MainFrame:SetCombatMode(true)
         elseif event == "PLAYER_REGEN_ENABLED" then

@@ -58,6 +58,9 @@ Write-Host ""
 # Copy main files
 Copy-Item "$SOURCE\$ADDON_NAME.toc" -Destination $WOW_ADDONS -Force
 Copy-Item "$SOURCE\$ADDON_NAME.lua" -Destination $WOW_ADDONS -Force
+if (Test-Path "$SOURCE\Bindings.xml") {
+    Copy-Item "$SOURCE\Bindings.xml" -Destination $WOW_ADDONS -Force
+}
 
 # Copy Locales folder
 if (Test-Path "$SOURCE\Locales") {
