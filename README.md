@@ -11,6 +11,7 @@ A World of Warcraft addon that makes disenchanting items from your bags quick an
 - **Blacklist system**: Right-click items to blacklist them (they won't appear in the list anymore)
 - **Blacklist management**: View and manage your blacklist with `/sde blacklist` or right-click on the profession button
 - **Profession integration**: Button in Enchanting profession UI (Recipes tab) to quickly open SimpleDisenchant
+- **Keybinding support**: Assign a keyboard shortcut to the disenchant button via WoW's Key Bindings UI
 - **Combat protection**: Addon is locked during combat with a visual overlay and warning message
 - **Tooltips**: Hover over items to see full item details
 - **Multi-language**: Supports English, French, German, Spanish, Italian, and Russian
@@ -36,6 +37,14 @@ Type `/sde` to open/close the SimpleDisenchant window.
 - `/sde blacklist clear` or `/sde bl clear` - Clear the entire blacklist
 - **Right-click** on the profession button (in Enchanting window) to open the blacklist
 - In the blacklist window, **right-click** on an item to remove it from the blacklist
+
+### Keybinding
+You can assign a keyboard shortcut to the disenchant button:
+1. Open WoW's Key Bindings UI (Escape > Key Bindings)
+2. Search for "Simple Disenchant"
+3. Assign your preferred key
+
+> **Note**: The window must be open for the keybinding to trigger the disenchant action.
 
 ### Profession Integration
 When you open the Enchanting profession window, a SimpleDisenchant button appears.
