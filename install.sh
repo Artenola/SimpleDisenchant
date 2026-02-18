@@ -62,6 +62,25 @@ echo ""
 # Copy main files
 cp "$SOURCE/$ADDON_NAME.toc" "$WOW_ADDONS/"
 cp "$SOURCE/$ADDON_NAME.lua" "$WOW_ADDONS/"
+[[ -f "$SOURCE/Bindings.xml" ]] && cp "$SOURCE/Bindings.xml" "$WOW_ADDONS/"
+
+# Copy Locales folder
+if [[ -d "$SOURCE/Locales" ]]; then
+    mkdir -p "$WOW_ADDONS/Locales"
+    cp -R "$SOURCE/Locales/"* "$WOW_ADDONS/Locales/"
+fi
+
+# Copy Core folder
+if [[ -d "$SOURCE/Core" ]]; then
+    mkdir -p "$WOW_ADDONS/Core"
+    cp -R "$SOURCE/Core/"* "$WOW_ADDONS/Core/"
+fi
+
+# Copy UI folder
+if [[ -d "$SOURCE/UI" ]]; then
+    mkdir -p "$WOW_ADDONS/UI"
+    cp -R "$SOURCE/UI/"* "$WOW_ADDONS/UI/"
+fi
 
 # Copy media folder if exists
 if [[ -d "$SOURCE/media" ]]; then

@@ -1,7 +1,14 @@
 -- SimpleDisenchant French Localization
 local addonName, addon = ...
 
+-- Keybinding labels (WoW global strings for the Keybindings UI)
+if GetLocale() == "frFR" then
+    _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
+    _G.BINDING_NAME_SDEBTN = "Désenchanter l'objet suivant"
+end
+
 addon.L["frFR"] = {
+
     TITLE = "Simple Disenchant",
     DISENCHANT = "Désenchanter",
     DISENCHANT_SPELL = "Désenchanter",
