@@ -1,7 +1,7 @@
 ## Interface: 120000, 120001
 ## Title: Simple Disenchant
 ## Author: Artenola
-## Version: 1.4.0
+## Version: 1.5.0
 
 ## Notes: Easily disenchant items from your bags with a simple interface
 ## Notes-frFR: Desenchantez facilement les objets de vos sacs
