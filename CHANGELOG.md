@@ -2,6 +2,30 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.5.0] - 2026-03-05
+
+### Added
+- **Minimap button**: Draggable button on the minimap edge for quick access
+  - Left-click to toggle main window
+  - Right-click to toggle blacklist
+  - Shift-click to hide the button
+  - Drag to reposition around the minimap
+  - Position and visibility saved per character
+  - Show/hide via `/sde minimap`
+- **Addon Compartment enhancements**: Same interactions as minimap button
+  - Left-click to toggle main window
+  - Right-click to toggle blacklist
+  - Shift-click to show/hide minimap button
+  - Tooltip with usage instructions
+- **New keybindings** (Key Bindings > Simple Disenchant):
+  - Toggle window: open/close the main frame
+  - Toggle blacklist: open/close the blacklist
+  - Toggle all windows: open or close all SimpleDisenchant windows at once
+
+### Fixed
+- Frame overlap: clicking a window now brings it to the front when frames overlap
+- Blacklist item icons now load correctly on first display (async item info handling)
+
 ## [1.4.0] - 2026-02-18
 
 ### Added

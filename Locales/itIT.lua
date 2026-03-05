@@ -5,6 +5,9 @@ local addonName, addon = ...
 if GetLocale() == "itIT" then
     _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
     _G.BINDING_NAME_SDEBTN = "Disincanta il prossimo oggetto"
+    _G.BINDING_NAME_SDETOGGLE = "Mostra/Nascondi finestra"
+    _G.BINDING_NAME_SDEBLACKLIST = "Mostra/Nascondi lista nera"
+    _G.BINDING_NAME_SDEALL = "Mostra/Nascondi tutte le finestre"
 end
 
 addon.L["itIT"] = {
@@ -31,4 +34,9 @@ addon.L["itIT"] = {
     BLACKLIST_OPEN_HINT = "Clic destro per lista nera",
     COMBAT_WARNING = "Non disponibile in combattimento",
     COMBAT_OVERLAY = "In combattimento...",
+    MINIMAP_TOOLTIP_LEFT = "Clic sinistro per aprire/chiudere",
+    MINIMAP_TOOLTIP_RIGHT = "Clic destro per lista nera",
+    MINIMAP_TOOLTIP_DRAG = "Trascina per spostare",
+    MINIMAP_TOOLTIP_HIDE = "Shift-clic per nascondere",
+    MINIMAP_HIDDEN_MSG = "Pulsante minimappa nascosto. Digita /sde minimap per mostrarlo.",
 }
