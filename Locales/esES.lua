@@ -5,6 +5,9 @@ local addonName, addon = ...
 if GetLocale() == "esES" or GetLocale() == "esMX" then
     _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
     _G.BINDING_NAME_SDEBTN = "Desencantar siguiente objeto"
+    _G.BINDING_NAME_SDETOGGLE = "Mostrar/Ocultar ventana"
+    _G.BINDING_NAME_SDEBLACKLIST = "Mostrar/Ocultar lista negra"
+    _G.BINDING_NAME_SDEALL = "Mostrar/Ocultar todas las ventanas"
 end
 
 addon.L["esES"] = {
@@ -48,6 +51,13 @@ addon.L["esES"] = {
     FILTER_RARITY_TOOLTIP = "Incluir o excluir objetos por rareza",
     FILTER_ILVL_TOOLTIP = "Establecer nivel de objeto mín/máx. Vacío = sin límite.",
     FILTER_GOLD_TOOLTIP = "Establecer precio de venta mín/máx en oro. Vacío = sin límite.",
+
+    -- Minimap button
+    MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
+    MINIMAP_TOOLTIP_RIGHT = "Clic derecho para lista negra",
+    MINIMAP_TOOLTIP_DRAG = "Arrastrar para mover",
+    MINIMAP_TOOLTIP_HIDE = "Shift-clic para ocultar",
+    MINIMAP_HIDDEN_MSG = "Botón del minimapa oculto. Escribe /sde minimap para mostrarlo.",
 }
 
 -- Latin American Spanish uses same as European Spanish

@@ -12,6 +12,8 @@
 
 ## IconTexture: Interface\Icons\INV_Enchant_Disenchant
 ## AddonCompartmentFunc: SimpleDisenchant_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: SimpleDisenchant_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: SimpleDisenchant_OnAddonCompartmentLeave
 ## SavedVariablesPerCharacter: SimpleDisenchantDB
 
 ## Category: Professions
@@ -42,6 +44,7 @@ UI\ItemList.lua
 UI\ProfessionButton.lua
 UI\BlacklistFrame.lua
 UI\FilteredItemsFrame.lua
+UI\MinimapButton.lua
 
 # Main
 SimpleDisenchant.lua

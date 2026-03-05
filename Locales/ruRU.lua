@@ -5,6 +5,9 @@ local addonName, addon = ...
 if GetLocale() == "ruRU" then
     _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
     _G.BINDING_NAME_SDEBTN = "Распылить следующий предмет"
+    _G.BINDING_NAME_SDETOGGLE = "Показать/Скрыть окно"
+    _G.BINDING_NAME_SDEBLACKLIST = "Показать/Скрыть черный список"
+    _G.BINDING_NAME_SDEALL = "Показать/Скрыть все окна"
 end
 
 addon.L["ruRU"] = {
@@ -48,4 +51,11 @@ addon.L["ruRU"] = {
     FILTER_RARITY_TOOLTIP = "Включить или исключить предметы по редкости",
     FILTER_ILVL_TOOLTIP = "Задать мин/макс уровень предмета. Пусто = без ограничений.",
     FILTER_GOLD_TOOLTIP = "Задать мин/макс цену у торговца в золоте. Пусто = без ограничений.",
+
+    -- Minimap button
+    MINIMAP_TOOLTIP_LEFT = "ЛКМ для открытия/закрытия",
+    MINIMAP_TOOLTIP_RIGHT = "ПКМ для черного списка",
+    MINIMAP_TOOLTIP_DRAG = "Перетащите для перемещения",
+    MINIMAP_TOOLTIP_HIDE = "Shift-клик чтобы скрыть",
+    MINIMAP_HIDDEN_MSG = "Кнопка миникарты скрыта. /sde minimap чтобы показать.",
 }
