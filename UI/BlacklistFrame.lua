@@ -2,6 +2,7 @@
 local addonName, addon = ...
 
 local C = addon.Constants
+local Utils = addon.Utils
 
 addon.BlacklistFrame = {}
 local BlacklistFrame = addon.BlacklistFrame
@@ -21,6 +22,7 @@ function BlacklistFrame:Create()
     frame:SetPoint("CENTER", 350, 0)
     frame:SetMovable(true)
     frame:EnableMouse(true)
+    frame:SetToplevel(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
@@ -79,11 +81,11 @@ function BlacklistFrame:Create()
 
     -- Create linear view
     local view = CreateScrollBoxListLinearView()
-    view:SetElementExtent(32)
+    view:SetElementExtent(C.ITEM_ROW_HEIGHT)
 
     -- Element initializer
     view:SetElementInitializer("Button", function(btn, elementData)
-        btn:SetSize(scrollBox:GetWidth(), 30)
+        btn:SetSize(scrollBox:GetWidth(), C.ITEM_ROW_HEIGHT - 2)
 
         -- Create UI elements once
         if not btn.bg then
@@ -98,18 +100,31 @@ function BlacklistFrame:Create()
             btn.icon:SetPoint("LEFT", btn, "LEFT", 4, 0)
 
             btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 8, 0)
+            btn.text:SetPoint("TOPLEFT", btn.icon, "TOPRIGHT", 6, -1)
             btn.text:SetPoint("RIGHT", btn, "RIGHT", -5, 0)
             btn.text:SetJustifyH("LEFT")
             btn.text:SetWordWrap(false)
+
+            btn.infoText = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            btn.infoText:SetPoint("BOTTOMLEFT", btn.icon, "BOTTOMRIGHT", 6, 0)
+            btn.infoText:SetJustifyH("LEFT")
+            btn.infoText:SetTextColor(0.7, 0.7, 0.7)
+
+            Utils:CreatePriceColumns(btn)
+
+            btn.separator = btn:CreateTexture(nil, "BORDER")
+            btn.separator:SetHeight(1)
+            btn.separator:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 2, -1)
+            btn.separator:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, -1)
+            btn.separator:SetColorTexture(0.3, 0.3, 0.3, 0.4)
         end
 
         -- Get item info
-        local itemName, _, quality, _, _, _, _, _, _, itemTexture
+        local itemName, _, quality, itemLevel, _, _, _, _, _, itemTexture, sellPrice
         if elementData.link then
-            itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(elementData.link)
+            itemName, _, quality, itemLevel, _, _, _, _, _, itemTexture, sellPrice = C_Item.GetItemInfo(elementData.link)
         elseif elementData.itemID then
-            itemName, _, quality, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(elementData.itemID)
+            itemName, _, quality, itemLevel, _, _, _, _, _, itemTexture, sellPrice = C_Item.GetItemInfo(elementData.itemID)
         end
 
         btn.icon:SetTexture(itemTexture or "Interface\\Icons\\INV_Misc_QuestionMark")
@@ -123,6 +138,22 @@ function BlacklistFrame:Create()
             end
         else
             btn.text:SetTextColor(1, 1, 1)
+        end
+
+        -- Show ilvl (left) and price columns (right-aligned)
+        local LL = addon.currentLocale
+        if itemLevel then
+            btn.infoText:SetText(LL.FILTER_ILVL_SHORT .. itemLevel)
+        else
+            btn.infoText:SetText("")
+        end
+
+        if sellPrice and sellPrice > 0 then
+            Utils:SetPriceColumns(btn, sellPrice)
+        else
+            btn.goldCol:SetText("")
+            btn.silverCol:SetText("")
+            btn.copperCol:SetText("")
         end
 
         -- Store data
@@ -159,6 +190,21 @@ function BlacklistFrame:Create()
     end)
 
     ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
+
+    -- Refresh when item info arrives from server (icons/names not cached on first call)
+    local pendingRefresh = false
+    frame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+    frame:SetScript("OnEvent", function(self, event)
+        if event == "GET_ITEM_INFO_RECEIVED" and self:IsShown() and not pendingRefresh then
+            pendingRefresh = true
+            C_Timer.After(0.1, function()
+                pendingRefresh = false
+                if frame and frame:IsShown() then
+                    BlacklistFrame:Refresh()
+                end
+            end)
+        end
+    end)
 
     -- Dock to MainFrame when shown
     frame:HookScript("OnShow", function(self)
@@ -233,4 +279,8 @@ function BlacklistFrame:Hide()
     if frame then
         frame:Hide()
     end
+end
+
+function BlacklistFrame:GetFrame()
+    return frame
 end

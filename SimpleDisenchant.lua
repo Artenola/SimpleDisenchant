@@ -7,11 +7,13 @@ addon.currentLocale = addon.L[addon.playerLocale] or addon.L["enUS"]
 local L = addon.currentLocale
 local Utils = addon.Utils
 local MainFrame = addon.MainFrame
-local FilterButtons = addon.FilterButtons
+local FilterPanel = addon.FilterPanel
 local ItemList = addon.ItemList
 local ProfessionButton = addon.ProfessionButton
 local Blacklist = addon.Blacklist
 local BlacklistFrame = addon.BlacklistFrame
+local FilteredItemsFrame = addon.FilteredItemsFrame
+local MinimapButton = addon.MinimapButton
 
 -- Initialize addon
 local function Initialize()
@@ -21,14 +23,17 @@ local function Initialize()
     -- Create main frame
     local frame = MainFrame:Create()
 
-    -- Create filter buttons
-    FilterButtons:CreateAll(frame)
+    -- Create filter panel (replaces old quality filter buttons)
+    FilterPanel:CreateAll(frame)
 
     -- Initialize item list
     ItemList:Initialize(frame)
 
     -- Initialize profession button
     ProfessionButton:Initialize()
+
+    -- Initialize minimap button
+    MinimapButton:Initialize()
 
     -- Apply keybinding to disenchant button
     local function ApplyKeybinding()
@@ -82,6 +87,11 @@ SlashCmdList["SIMPLEDISENCHANT"] = function(msg)
         if MainFrame:IsShown() then
             ItemList:ScanBags()
         end
+    elseif cmd == "filtered" or cmd == "filter" then
+        -- Open filtered items frame
+        FilteredItemsFrame:Toggle()
+    elseif cmd == "minimap" then
+        MinimapButton:Toggle()
     else
         -- Default: toggle main frame
         MainFrame:Toggle()
@@ -93,9 +103,63 @@ end
 
 -- Addon compartment click handler
 function SimpleDisenchant_OnAddonCompartmentClick(addonName, buttonName)
+    if InCombatLockdown() then
+        Utils:Print(L.COMBAT_WARNING)
+        return
+    end
+    if IsShiftKeyDown() then
+        MinimapButton:Toggle()
+        return
+    end
+    if buttonName == "RightButton" then
+        BlacklistFrame:Toggle()
+    else
+        MainFrame:Toggle()
+        if MainFrame:IsShown() then
+            ItemList:ScanBags()
+        end
+    end
+end
+
+-- Addon compartment tooltip
+function SimpleDisenchant_OnAddonCompartmentEnter(addonName, button)
+    GameTooltip:SetOwner(button, "ANCHOR_NONE")
+    GameTooltip:SetPoint("TOPRIGHT", button, "BOTTOMRIGHT", 0, 0)
+    GameTooltip:SetText(L.TITLE)
+    GameTooltip:AddLine(L.MINIMAP_TOOLTIP_LEFT, 1, 1, 1)
+    GameTooltip:AddLine(L.MINIMAP_TOOLTIP_RIGHT, 1, 1, 1)
+    GameTooltip:AddLine(L.MINIMAP_TOOLTIP_HIDE, 0.7, 0.7, 0.7)
+    GameTooltip:Show()
+end
+
+function SimpleDisenchant_OnAddonCompartmentLeave(addonName, button)
+    GameTooltip:Hide()
+end
+
+-- Keybinding toggle handlers (called from Bindings.xml)
+function SimpleDisenchant_ToggleFrame()
     MainFrame:Toggle()
     if MainFrame:IsShown() then
         ItemList:ScanBags()
+    end
+end
+
+function SimpleDisenchant_ToggleBlacklist()
+    BlacklistFrame:Toggle()
+end
+
+function SimpleDisenchant_ToggleAll()
+    -- If any window is shown, close all. Otherwise, open all.
+    local anyShown = MainFrame:IsShown() or BlacklistFrame:IsShown()
+    if anyShown then
+        if MainFrame:IsShown() then MainFrame:Toggle() end
+        if BlacklistFrame:IsShown() then BlacklistFrame:Toggle() end
+    else
+        MainFrame:Toggle()
+        BlacklistFrame:Toggle()
+        if MainFrame:IsShown() then
+            ItemList:ScanBags()
+        end
     end
 end
 

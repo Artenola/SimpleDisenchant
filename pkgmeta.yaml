@@ -12,7 +12,11 @@ ignore:
   - "*.bat"
   - "*.ps1"
   - "*.sh"
-
+  - "*.jpg"
+  - "*.jpeg"
+  - "*.png"
+  - "install.config.example"
+  
 manual-changelog:
   filename: CHANGELOG.md
   markup-type: markdown

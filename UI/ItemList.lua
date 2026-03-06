@@ -3,7 +3,7 @@ local addonName, addon = ...
 
 local C = addon.Constants
 local Utils = addon.Utils
-local FilterButtons = addon.FilterButtons
+local FilterPanel = addon.FilterPanel
 local Blacklist = addon.Blacklist
 
 addon.ItemList = {}
@@ -11,6 +11,12 @@ local ItemList = addon.ItemList
 
 -- List of disenchantable items
 local disenchantList = {}
+
+-- Filtered-out items (by ilvl/gold filters)
+local filteredItems = {
+    overIlvl = {},
+    overGold = {},
+}
 
 -- UI elements
 local scrollBox, scrollBar
@@ -31,6 +37,10 @@ end
 
 function ItemList:GetFirstItem()
     return disenchantList[1]
+end
+
+function ItemList:GetFilteredItems()
+    return filteredItems
 end
 
 function ItemList:CreateIconFrame(parent)
@@ -198,19 +208,48 @@ function ItemList:CreateScrollList(parent)
             btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
 
             btn.icon = btn:CreateTexture(nil, "ARTWORK")
-            btn.icon:SetSize(32, 32)
-            btn.icon:SetPoint("LEFT", btn, "LEFT", 2, 0)
+            btn.icon:SetSize(24, 24)
+            btn.icon:SetPoint("LEFT", btn, "LEFT", 4, 0)
 
             btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 8, 0)
+            btn.text:SetPoint("TOPLEFT", btn.icon, "TOPRIGHT", 6, -1)
             btn.text:SetPoint("RIGHT", btn, "RIGHT", -5, 0)
             btn.text:SetJustifyH("LEFT")
             btn.text:SetWordWrap(false)
+
+            btn.infoText = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            btn.infoText:SetPoint("BOTTOMLEFT", btn.icon, "BOTTOMRIGHT", 6, 0)
+            btn.infoText:SetJustifyH("LEFT")
+            btn.infoText:SetTextColor(0.7, 0.7, 0.7)
+
+            Utils:CreatePriceColumns(btn)
+
+            btn.separator = btn:CreateTexture(nil, "BORDER")
+            btn.separator:SetHeight(1)
+            btn.separator:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 2, -1)
+            btn.separator:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, -1)
+            btn.separator:SetColorTexture(0.3, 0.3, 0.3, 0.4)
         end
 
         -- Configure with item data
         btn.icon:SetTexture(elementData.icon)
         btn.text:SetText(elementData.link)
+
+        -- Show ilvl (left) and price columns (right-aligned)
+        local L = addon.currentLocale
+        if elementData.itemLevel then
+            btn.infoText:SetText(L.FILTER_ILVL_SHORT .. elementData.itemLevel)
+        else
+            btn.infoText:SetText("")
+        end
+
+        if elementData.sellPrice and elementData.sellPrice > 0 then
+            Utils:SetPriceColumns(btn, elementData.sellPrice)
+        else
+            btn.goldCol:SetText("")
+            btn.silverCol:SetText("")
+            btn.copperCol:SetText("")
+        end
 
         btn.itemBag = elementData.bag
         btn.itemSlot = elementData.slot
@@ -221,11 +260,11 @@ function ItemList:CreateScrollList(parent)
         btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
         btn:SetScript("OnEnter", function(self)
-            local L = addon.currentLocale
+            local LL = addon.currentLocale
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:SetBagItem(self.itemBag, self.itemSlot)
             GameTooltip:AddLine(" ")
-            GameTooltip:AddLine(L.BLACKLIST_HINT or "Right-click to blacklist", 0.7, 0.7, 0.7)
+            GameTooltip:AddLine(LL.BLACKLIST_HINT or "Right-click to blacklist", 0.7, 0.7, 0.7)
             GameTooltip:Show()
         end)
         btn:SetScript("OnLeave", GameTooltip_Hide)
@@ -284,33 +323,67 @@ end
 function ItemList:ScanBags()
     local L = addon.currentLocale
 
-    -- Clear list
+    -- Clear lists
     wipe(disenchantList)
+    wipe(filteredItems.overIlvl)
+    wipe(filteredItems.overGold)
 
     local count = 0
+
+    -- Get search text for name filtering
+    local searchText = FilterPanel:GetSearchText()
+    local hasSearch = searchText and searchText ~= ""
+    if hasSearch then
+        searchText = searchText:lower()
+    end
 
     for bag = 0, 4 do
         local numSlots = C_Container.GetContainerNumSlots(bag)
         for slot = 1, numSlots do
             local info = C_Container.GetContainerItemInfo(bag, slot)
             if info and info.hyperlink then
-                local itemName, _, quality = C_Item.GetItemInfo(info.hyperlink)
+                local itemName, _, quality, itemLevel, _, _, _, _, _, _, sellPrice = C_Item.GetItemInfo(info.hyperlink)
                 local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(info.hyperlink)
 
-                -- Armor or Weapon, green+ quality, filter active, and not blacklisted
+                -- Armor or Weapon, green+ quality, quality filter active, and not blacklisted
                 local isBlacklisted = Blacklist and Blacklist:IsBlacklisted(info.hyperlink)
-                if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterButtons:IsQualityEnabled(quality) and not isBlacklisted then
-                    count = count + 1
+                if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterPanel:IsQualityEnabled(quality) and not isBlacklisted then
 
-                    table.insert(disenchantList, {
-                        bag = bag,
-                        slot = slot,
-                        link = info.hyperlink,
-                        name = itemName,
-                        icon = info.iconFileID,
-                        quality = quality,
-                        itemID = info.itemID
-                    })
+                    -- Search filter: skip items that don't match search text
+                    local matchesSearch = true
+                    if hasSearch then
+                        matchesSearch = itemName and itemName:lower():find(searchText, 1, true) ~= nil
+                    end
+
+                    if matchesSearch then
+                        local itemData = {
+                            bag = bag,
+                            slot = slot,
+                            link = info.hyperlink,
+                            name = itemName,
+                            icon = info.iconFileID,
+                            quality = quality,
+                            itemID = info.itemID,
+                            itemLevel = itemLevel,
+                            sellPrice = sellPrice or 0,
+                        }
+
+                        -- Check ilvl/gold filters
+                        local passesIlvl, passesGold = FilterPanel:CheckItemFilters(itemLevel, sellPrice)
+
+                        if passesIlvl and passesGold then
+                            count = count + 1
+                            table.insert(disenchantList, itemData)
+                        else
+                            -- Add to filtered-out lists (item can appear in both)
+                            if not passesIlvl then
+                                table.insert(filteredItems.overIlvl, itemData)
+                            end
+                            if not passesGold then
+                                table.insert(filteredItems.overGold, itemData)
+                            end
+                        end
+                    end
                 end
             end
         end
@@ -327,6 +400,11 @@ function ItemList:ScanBags()
 
     -- Update disenchant button
     self:UpdateDisenchantButton()
+
+    -- Refresh filtered items frame if open
+    if addon.FilteredItemsFrame and addon.FilteredItemsFrame:IsShown() then
+        addon.FilteredItemsFrame:Refresh()
+    end
 end
 
 function ItemList:Initialize(parent)
@@ -336,7 +414,7 @@ function ItemList:Initialize(parent)
     self:CreateScrollList(parent)
 
     -- Set filter callback
-    FilterButtons:SetCallback(function()
+    FilterPanel:SetCallback(function()
         self:ScanBags()
     end)
 end
