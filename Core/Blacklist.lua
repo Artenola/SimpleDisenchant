@@ -39,6 +39,9 @@ function Blacklist:Initialize()
             if not SimpleDisenchantDB.blacklist then
                 SimpleDisenchantDB.blacklist = {}
             end
+            if not SimpleDisenchantDB.minimap then
+                SimpleDisenchantDB.minimap = { angle = 225, hidden = false }
+            end
             if not SimpleDisenchantDB.filters then
                 SimpleDisenchantDB.filters = {
                     quality = { [2] = true, [3] = true, [4] = true },

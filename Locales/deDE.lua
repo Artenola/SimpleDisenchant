@@ -31,6 +31,11 @@ addon.L["deDE"] = {
     BLACKLIST_OPEN_HINT = "Rechtsklick für Sperrliste",
     COMBAT_WARNING = "Im Kampf nicht verfügbar",
     COMBAT_OVERLAY = "Im Kampf...",
+    MINIMAP_TOOLTIP_LEFT = "Linksklick zum Öffnen/Schließen",
+    MINIMAP_TOOLTIP_RIGHT = "Rechtsklick für Sperrliste",
+    MINIMAP_TOOLTIP_DRAG = "Ziehen zum Verschieben",
+    MINIMAP_TOOLTIP_HIDE = "Umschalt-Klick zum Ausblenden",
+    MINIMAP_HIDDEN_MSG = "Minimap-Button ausgeblendet. /sde minimap zum Einblenden.",
 
     FILTER_BUTTON = "Filter",
     FILTER_RARITY = "Seltenheit",

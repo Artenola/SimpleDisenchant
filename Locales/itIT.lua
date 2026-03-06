@@ -31,6 +31,11 @@ addon.L["itIT"] = {
     BLACKLIST_OPEN_HINT = "Clic destro per lista nera",
     COMBAT_WARNING = "Non disponibile in combattimento",
     COMBAT_OVERLAY = "In combattimento...",
+    MINIMAP_TOOLTIP_LEFT = "Clic sinistro per aprire/chiudere",
+    MINIMAP_TOOLTIP_RIGHT = "Clic destro per lista nera",
+    MINIMAP_TOOLTIP_DRAG = "Trascina per spostare",
+    MINIMAP_TOOLTIP_HIDE = "Shift-clic per nascondere",
+    MINIMAP_HIDDEN_MSG = "Pulsante minimappa nascosto. Digita /sde minimap per mostrarlo.",
 
     FILTER_BUTTON = "Filtra",
     FILTER_RARITY = "Rarità",
