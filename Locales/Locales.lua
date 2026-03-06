@@ -27,6 +27,11 @@ L["enUS"] = {
     BLACKLIST_OPEN_HINT = "Right-click for blacklist",
     COMBAT_WARNING = "Not available in combat",
     COMBAT_OVERLAY = "In combat...",
+    MINIMAP_TOOLTIP_LEFT = "Left-click to toggle window",
+    MINIMAP_TOOLTIP_RIGHT = "Right-click for blacklist",
+    MINIMAP_TOOLTIP_DRAG = "Drag to move",
+    MINIMAP_TOOLTIP_HIDE = "Shift-click to hide",
+    MINIMAP_HIDDEN_MSG = "Minimap button hidden. Type /sde minimap to show it again.",
 
     -- Filter panel
     FILTER_BUTTON = "Filter",

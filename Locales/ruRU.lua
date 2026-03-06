@@ -31,6 +31,11 @@ addon.L["ruRU"] = {
     BLACKLIST_OPEN_HINT = "ПКМ для черного списка",
     COMBAT_WARNING = "Недоступно в бою",
     COMBAT_OVERLAY = "В бою...",
+    MINIMAP_TOOLTIP_LEFT = "ЛКМ для открытия/закрытия",
+    MINIMAP_TOOLTIP_RIGHT = "ПКМ для черного списка",
+    MINIMAP_TOOLTIP_DRAG = "Перетащите для перемещения",
+    MINIMAP_TOOLTIP_HIDE = "Shift-клик чтобы скрыть",
+    MINIMAP_HIDDEN_MSG = "Кнопка миникарты скрыта. /sde minimap чтобы показать.",
 
     FILTER_BUTTON = "Фильтр",
     FILTER_RARITY = "Редкость",
