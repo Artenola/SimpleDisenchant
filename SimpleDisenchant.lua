@@ -12,7 +12,6 @@ local ItemList = addon.ItemList
 local ProfessionButton = addon.ProfessionButton
 local Blacklist = addon.Blacklist
 local BlacklistFrame = addon.BlacklistFrame
-local MinimapButton = addon.MinimapButton
 local FilteredItemsFrame = addon.FilteredItemsFrame
 local MinimapButton = addon.MinimapButton
 
@@ -88,8 +87,6 @@ SlashCmdList["SIMPLEDISENCHANT"] = function(msg)
         if MainFrame:IsShown() then
             ItemList:ScanBags()
         end
-    elseif cmd == "minimap" then
-        MinimapButton:Toggle()
     elseif cmd == "filtered" or cmd == "filter" then
         -- Open filtered items frame
         FilteredItemsFrame:Toggle()
