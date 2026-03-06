@@ -39,6 +39,15 @@ function Blacklist:Initialize()
             if not SimpleDisenchantDB.blacklist then
                 SimpleDisenchantDB.blacklist = {}
             end
+            if not SimpleDisenchantDB.filters then
+                SimpleDisenchantDB.filters = {
+                    quality = { [2] = true, [3] = true, [4] = true },
+                    ilvlMin = nil,
+                    ilvlMax = nil,
+                    goldMin = nil,
+                    goldMax = nil,
+                }
+            end
             blacklistedItems = SimpleDisenchantDB.blacklist
             initialized = true
             self:UnregisterEvent("ADDON_LOADED")

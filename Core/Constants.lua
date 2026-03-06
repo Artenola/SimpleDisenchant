@@ -31,4 +31,21 @@ C.FRAME_WIDTH = 320
 C.FRAME_HEIGHT = 450
 
 -- Item list row height
-C.ITEM_ROW_HEIGHT = 38
+C.ITEM_ROW_HEIGHT = 36
+
+-- Filtered items frame dimensions
+C.FILTERED_FRAME_WIDTH = 300
+C.FILTERED_FRAME_HEIGHT = 400
+
+-- Default filter values (nil means "no limit")
+C.DEFAULT_FILTERS = {
+    quality = { [2] = true, [3] = true, [4] = true },
+    ilvlMin = nil,
+    ilvlMax = nil,
+    goldMin = nil,
+    goldMax = nil,
+}
+
+-- Gold conversion
+C.COPPER_PER_GOLD = 10000
+C.COPPER_PER_SILVER = 100

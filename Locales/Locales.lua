@@ -12,9 +12,6 @@ L["enUS"] = {
     DISENCHANT_SPELL = "Disenchant",
     NO_ITEM = "No item",
     ITEMS_COUNT = "%d item(s) to disenchant",
-    QUALITY_GREEN = "Green",
-    QUALITY_BLUE = "Blue",
-    QUALITY_PURPLE = "Purple",
     LOADED_MSG = "/sde to open",
     DRAG_TO_ACTIONBAR = "Drag to action bar",
     BLACKLIST_ADDED = "%s added to blacklist",
@@ -30,6 +27,29 @@ L["enUS"] = {
     BLACKLIST_OPEN_HINT = "Right-click for blacklist",
     COMBAT_WARNING = "Not available in combat",
     COMBAT_OVERLAY = "In combat...",
+
+    -- Filter panel
+    FILTER_BUTTON = "Filter",
+    FILTER_RARITY = "Rarity",
+    FILTER_ITEM_LEVEL = "Item Level",
+    FILTER_VENDOR_PRICE = "Vendor Price",
+    FILTER_MIN = "Min:",
+    FILTER_MAX = "Max:",
+    FILTER_RESET = "Reset",
+    FILTER_ILVL_SHORT = "iLvl ",
+
+    -- Filtered items frame
+    FILTERED_TITLE = "Filtered Items",
+    FILTERED_COUNT = "%d item(s) filtered",
+    FILTERED_OVER_ILVL = "Item Level",
+    FILTERED_OVER_GOLD = "Vendor Price",
+    FILTERED_SELECT_HINT = "Click to disenchant anyway",
+    FILTERED_TOOLTIP_HINT = "Items excluded by filters",
+
+    -- Filter tooltips
+    FILTER_RARITY_TOOLTIP = "Include or exclude items by rarity",
+    FILTER_ILVL_TOOLTIP = "Set min/max item level. Leave empty for no limit.",
+    FILTER_GOLD_TOOLTIP = "Set min/max vendor price in gold. Leave empty for no limit.",
 }
 
 -- English GB uses same as US
