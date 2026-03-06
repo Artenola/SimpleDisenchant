@@ -23,12 +23,32 @@ All notable changes to SimpleDisenchant will be documented in this file.
   - Applied to main item list, blacklist, and filtered items panel
 - **Visual separator lines** between items in all scroll lists
 - **Filtered Items button** in the main frame header to toggle the filtered panel
+- **Minimap button**: Draggable button on the minimap edge for quick access
+  - Left-click to toggle main window
+  - Right-click to toggle blacklist
+  - Shift-click to hide the button
+  - Drag to reposition around the minimap
+  - Position and visibility saved per character
+  - Show/hide via `/sde minimap`
+- **Addon Compartment enhancements**: Same interactions as minimap button
+  - Left-click to toggle main window
+  - Right-click to toggle blacklist
+  - Shift-click to show/hide minimap button
+  - Tooltip with usage instructions
+- **New keybindings** (Key Bindings > Simple Disenchant):
+  - Toggle window: open/close the main frame
+  - Toggle blacklist: open/close the blacklist
+  - Toggle all windows: open or close all SimpleDisenchant windows at once
 
 ### Changed
 - Quality filter buttons replaced by native WoW filter dropdown (WowStyle1FilterDropdownTemplate)
 - Blacklist frame now displays item level and vendor price on each row
 - Item row height reduced from 42px to 36px with smaller 24px icons for a more compact list
 - Module renamed from FilterButtons to FilterPanel for clarity
+
+### Fixed
+- Frame overlap: clicking a window now brings it to the front when frames overlap
+- Blacklist item icons now load correctly on first display (async item info handling)
 
 ## [1.4.0] - 2026-02-18
 

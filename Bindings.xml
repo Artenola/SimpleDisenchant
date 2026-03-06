@@ -1,3 +1,12 @@
 <Bindings>
     <Binding category="BINDING_HEADER_SIMPLEDISENCHANT" name="SDEBTN"/>
+    <Binding category="BINDING_HEADER_SIMPLEDISENCHANT" name="SDETOGGLE">
+        SimpleDisenchant_ToggleFrame()
+    </Binding>
+    <Binding category="BINDING_HEADER_SIMPLEDISENCHANT" name="SDEBLACKLIST">
+        SimpleDisenchant_ToggleBlacklist()
+    </Binding>
+    <Binding category="BINDING_HEADER_SIMPLEDISENCHANT" name="SDEALL">
+        SimpleDisenchant_ToggleAll()
+    </Binding>
 </Bindings>

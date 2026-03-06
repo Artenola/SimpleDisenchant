@@ -14,7 +14,9 @@ A World of Warcraft addon that makes disenchanting items from your bags quick an
 - **Blacklist system**: Right-click items to blacklist them (they won't appear in the list anymore)
 - **Blacklist management**: View and manage your blacklist with `/sde blacklist` or right-click on the profession button
 - **Profession integration**: Button in Enchanting profession UI (Recipes tab) to quickly open SimpleDisenchant
-- **Keybinding support**: Assign a keyboard shortcut to the disenchant button via WoW's Key Bindings UI
+- **Minimap button**: Draggable button on the minimap edge — left-click to toggle, right-click for blacklist, shift-click to hide
+- **Addon Compartment**: Same controls as minimap button, with tooltip instructions
+- **Keybinding support**: Assign keyboard shortcuts via WoW's Key Bindings UI (disenchant, toggle window, toggle blacklist, toggle all windows)
 - **Combat protection**: Addon is locked during combat with a visual overlay and warning message
 - **Tooltips**: Hover over items to see full item details
 - **Multi-language**: Supports English, French, German, Spanish, Italian, and Russian
@@ -52,13 +54,28 @@ Items excluded by item level or vendor price filters appear in a separate **Filt
 - **Right-click** on the profession button (in Enchanting window) to open the blacklist
 - In the blacklist window, **right-click** on an item to remove it from the blacklist
 
-### Keybinding
-You can assign a keyboard shortcut to the disenchant button:
-1. Open WoW's Key Bindings UI (Escape > Key Bindings)
-2. Search for "Simple Disenchant"
-3. Assign your preferred key
+### Minimap Button
+A draggable button appears on the minimap edge for quick access:
+- **Left-click**: Toggle the main window
+- **Right-click**: Toggle the blacklist
+- **Shift-click**: Hide the minimap button
+- **Drag**: Reposition the button around the minimap
+- `/sde minimap` to show/hide the button
 
-> **Note**: The window must be open for the keybinding to trigger the disenchant action.
+Position and visibility are saved per character.
+
+### Addon Compartment
+Click the SimpleDisenchant icon in the addon compartment (top-right menu bar):
+- **Left-click**: Toggle the main window
+- **Right-click**: Toggle the blacklist
+- **Shift-click**: Show/hide the minimap button
+
+### Keybindings
+Assign keyboard shortcuts via WoW's Key Bindings UI (Escape > Key Bindings > Simple Disenchant):
+- **Disenchant next item**: Trigger the disenchant button (window must be open)
+- **Toggle window**: Open/close the main window
+- **Toggle blacklist**: Open/close the blacklist
+- **Toggle all windows**: Open or close all SimpleDisenchant windows at once
 
 ### Profession Integration
 When you open the Enchanting profession window, a SimpleDisenchant button appears.
