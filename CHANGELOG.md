@@ -2,6 +2,34 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.5.0] - 2026-03-06
+
+### Added
+- **Item filters** (Issue #19, #20, #21): Filter dropdown with WoW-native menu API
+  - Quality/rarity checkboxes with colored names (Uncommon, Rare, Epic) matching Auction House style
+  - Item level min/max range filter to protect high-level gear from accidental disenchanting
+  - Vendor price min/max range filter (in gold) to keep valuable items
+  - Section titles with descriptive tooltips on hover
+  - Built-in reset button to restore default filters
+  - Filter settings saved per-character in SavedVariables
+- **Search box**: Filter items by name with instant search (Blizzard SearchBoxTemplate)
+- **Filtered Items panel**: Side panel showing items excluded by ilvl/gold filters
+  - Items grouped by filter reason (Item Level / Vendor Price) with section headers
+  - Click any filtered item to disenchant it anyway
+  - Auto-docks next to main frame or blacklist frame
+- **Item details on every row**: Item level and vendor sell price displayed below item name
+  - Aligned price columns (gold | silver | copper) with coin icons for easy comparison
+  - Consistent "00" placeholder when a denomination is zero for perfect alignment
+  - Applied to main item list, blacklist, and filtered items panel
+- **Visual separator lines** between items in all scroll lists
+- **Filtered Items button** in the main frame header to toggle the filtered panel
+
+### Changed
+- Quality filter buttons replaced by native WoW filter dropdown (WowStyle1FilterDropdownTemplate)
+- Blacklist frame now displays item level and vendor price on each row
+- Item row height reduced from 42px to 36px with smaller 24px icons for a more compact list
+- Module renamed from FilterButtons to FilterPanel for clarity
+
 ## [1.4.0] - 2026-02-18
 
 ### Added
