@@ -7,12 +7,13 @@ addon.currentLocale = addon.L[addon.playerLocale] or addon.L["enUS"]
 local L = addon.currentLocale
 local Utils = addon.Utils
 local MainFrame = addon.MainFrame
-local FilterButtons = addon.FilterButtons
+local FilterPanel = addon.FilterPanel
 local ItemList = addon.ItemList
 local ProfessionButton = addon.ProfessionButton
 local Blacklist = addon.Blacklist
 local BlacklistFrame = addon.BlacklistFrame
 local MinimapButton = addon.MinimapButton
+local FilteredItemsFrame = addon.FilteredItemsFrame
 
 -- Initialize addon
 local function Initialize()
@@ -22,8 +23,8 @@ local function Initialize()
     -- Create main frame
     local frame = MainFrame:Create()
 
-    -- Create filter buttons
-    FilterButtons:CreateAll(frame)
+    -- Create filter panel (replaces old quality filter buttons)
+    FilterPanel:CreateAll(frame)
 
     -- Initialize item list
     ItemList:Initialize(frame)
@@ -88,6 +89,9 @@ SlashCmdList["SIMPLEDISENCHANT"] = function(msg)
         end
     elseif cmd == "minimap" then
         MinimapButton:Toggle()
+    elseif cmd == "filtered" or cmd == "filter" then
+        -- Open filtered items frame
+        FilteredItemsFrame:Toggle()
     else
         -- Default: toggle main frame
         MainFrame:Toggle()

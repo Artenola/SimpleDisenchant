@@ -6,7 +6,10 @@ A World of Warcraft addon that makes disenchanting items from your bags quick an
 
 - **Easy disenchanting**: Display all disenchantable items (weapons and armor) in a clean interface
 - **One-click action**: Select an item and disenchant it with a single button click
-- **Quality filters**: Filter items by quality (Green, Blue, Purple)
+- **Smart filters**: Filter items by rarity, item level range, and vendor price range using WoW's native dropdown menu
+- **Search**: Instantly find items by name with the built-in search box
+- **Filtered items panel**: View items excluded by filters and click to disenchant them anyway
+- **Item details**: Each item row shows item level and vendor price with aligned gold/silver/copper columns
 - **Item selection**: Click any item in the list to set it as the next to disenchant
 - **Blacklist system**: Right-click items to blacklist them (they won't appear in the list anymore)
 - **Blacklist management**: View and manage your blacklist with `/sde blacklist` or right-click on the profession button
@@ -25,9 +28,20 @@ Type `/sde` to open/close the SimpleDisenchant window.
 
 1. Open the window with `/sde`
 2. Browse your disenchantable items in the list
-3. Click an item to select it (or use the first one by default)
-4. Click the "Disenchant" button to disenchant the selected item
-5. Use the quality filters to show/hide items by rarity
+3. Use the **search box** to find items by name
+4. Click the **Filter** button to refine by rarity, item level, or vendor price
+5. Click an item to select it (or use the first one by default)
+6. Click the "Disenchant" button to disenchant the selected item
+
+### Filters
+Click the **Filter** button next to the search box to open the filter dropdown:
+- **Rarity**: Check/uncheck Uncommon, Rare, or Epic to show/hide items by quality
+- **Item Level**: Set a min and/or max item level range
+- **Vendor Price**: Set a min and/or max vendor price in gold
+- Hover over section titles for tooltips explaining each filter
+- Use the **reset button** (appears when filters are active) to restore defaults
+
+Items excluded by item level or vendor price filters appear in a separate **Filtered Items** panel. Click any filtered item to disenchant it anyway.
 
 ### Blacklist
 - **Right-click** on any item in the list to add it to the blacklist
