@@ -31,11 +31,6 @@ addon.L["esES"] = {
     BLACKLIST_OPEN_HINT = "Clic derecho para lista negra",
     COMBAT_WARNING = "No disponible en combate",
     COMBAT_OVERLAY = "En combate...",
-    MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
-    MINIMAP_TOOLTIP_RIGHT = "Clic derecho para lista negra",
-    MINIMAP_TOOLTIP_DRAG = "Arrastrar para mover",
-    MINIMAP_TOOLTIP_HIDE = "Shift-clic para ocultar",
-    MINIMAP_HIDDEN_MSG = "Botón del minimapa oculto. Escribe /sde minimap para mostrarlo.",
 
     FILTER_BUTTON = "Filtrar",
     FILTER_RARITY = "Rareza",
