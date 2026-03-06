@@ -41,6 +41,7 @@ UI\FilterButtons.lua
 UI\ItemList.lua
 UI\ProfessionButton.lua
 UI\BlacklistFrame.lua
+UI\FilteredItemsFrame.lua
 
 # Main
 SimpleDisenchant.lua

@@ -60,6 +60,30 @@ function MainFrame:Create()
     end)
     blBtn:SetScript("OnLeave", GameTooltip_Hide)
 
+    -- Filtered items button (next to blacklist button)
+    local filteredBtn = CreateFrame("Button", nil, frame)
+    filteredBtn:SetSize(24, 24)
+    filteredBtn:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -54, -2)
+
+    filteredBtn.icon = filteredBtn:CreateTexture(nil, "ARTWORK")
+    filteredBtn.icon:SetAllPoints()
+    filteredBtn.icon:SetTexture("Interface\\Icons\\INV_Misc_Bag_07")
+    filteredBtn.icon:SetDesaturated(false)
+
+    filteredBtn:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+
+    filteredBtn:SetScript("OnClick", function()
+        addon.FilteredItemsFrame:Toggle()
+    end)
+
+    filteredBtn:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(L.FILTERED_TITLE)
+        GameTooltip:AddLine(L.FILTERED_TOOLTIP_HINT, 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    filteredBtn:SetScript("OnLeave", GameTooltip_Hide)
+
     -- Dock to ProfessionsFrame when opened from there
     frame:HookScript("OnShow", function(self)
         if ProfessionsFrame and ProfessionsFrame:IsShown() then
