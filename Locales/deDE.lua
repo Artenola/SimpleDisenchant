@@ -5,6 +5,9 @@ local addonName, addon = ...
 if GetLocale() == "deDE" then
     _G.BINDING_HEADER_SIMPLEDISENCHANT = "Simple Disenchant"
     _G.BINDING_NAME_SDEBTN = "Nächsten Gegenstand entzaubern"
+    _G.BINDING_NAME_SDETOGGLE = "Fenster ein-/ausblenden"
+    _G.BINDING_NAME_SDEBLACKLIST = "Sperrliste ein-/ausblenden"
+    _G.BINDING_NAME_SDEALL = "Alle Fenster ein-/ausblenden"
 end
 
 addon.L["deDE"] = {
@@ -48,4 +51,11 @@ addon.L["deDE"] = {
     FILTER_RARITY_TOOLTIP = "Gegenstände nach Seltenheit ein- oder ausschließen",
     FILTER_ILVL_TOOLTIP = "Min/Max Gegenstandsstufe festlegen. Leer = keine Begrenzung.",
     FILTER_GOLD_TOOLTIP = "Min/Max Händlerpreis in Gold festlegen. Leer = keine Begrenzung.",
+
+    -- Minimap button
+    MINIMAP_TOOLTIP_LEFT = "Linksklick zum Öffnen/Schließen",
+    MINIMAP_TOOLTIP_RIGHT = "Rechtsklick für Sperrliste",
+    MINIMAP_TOOLTIP_DRAG = "Ziehen zum Verschieben",
+    MINIMAP_TOOLTIP_HIDE = "Umschalt-Klick zum Ausblenden",
+    MINIMAP_HIDDEN_MSG = "Minimap-Button ausgeblendet. /sde minimap zum Einblenden.",
 }

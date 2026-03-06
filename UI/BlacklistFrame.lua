@@ -22,6 +22,7 @@ function BlacklistFrame:Create()
     frame:SetPoint("CENTER", 350, 0)
     frame:SetMovable(true)
     frame:EnableMouse(true)
+    frame:SetToplevel(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
@@ -189,6 +190,21 @@ function BlacklistFrame:Create()
     end)
 
     ScrollUtil.InitScrollBoxListWithScrollBar(scrollBox, scrollBar, view)
+
+    -- Refresh when item info arrives from server (icons/names not cached on first call)
+    local pendingRefresh = false
+    frame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+    frame:SetScript("OnEvent", function(self, event)
+        if event == "GET_ITEM_INFO_RECEIVED" and self:IsShown() and not pendingRefresh then
+            pendingRefresh = true
+            C_Timer.After(0.1, function()
+                pendingRefresh = false
+                if frame and frame:IsShown() then
+                    BlacklistFrame:Refresh()
+                end
+            end)
+        end
+    end)
 
     -- Dock to MainFrame when shown
     frame:HookScript("OnShow", function(self)
