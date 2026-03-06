@@ -12,7 +12,10 @@ ignore:
   - "*.bat"
   - "*.ps1"
   - "*.sh"
-
+  - "*.jpg"
+  - "*.jpeg"
+  - "*.png"
+  
 manual-changelog:
   filename: CHANGELOG.md
   markup-type: markdown
