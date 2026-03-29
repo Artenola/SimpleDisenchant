@@ -60,6 +60,10 @@ addon.L["esES"] = {
 
     -- Reset positions
     RESET_POSITIONS_MSG = "Todas las posiciones de ventanas han sido reiniciadas.",
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Ocultar objetos de set de equipo",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Ocultar objetos que pertenecen a un set de equipo para evitar desencantarlos por error.",
+    FILTERED_EQUIPMENT_SET = "Set de equipo",
 
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
