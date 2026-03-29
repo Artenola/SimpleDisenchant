@@ -52,6 +52,11 @@ addon.L["ruRU"] = {
     FILTER_ILVL_TOOLTIP = "Задать мин/макс уровень предмета. Пусто = без ограничений.",
     FILTER_GOLD_TOOLTIP = "Задать мин/макс цену у торговца в золоте. Пусто = без ограничений.",
 
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Скрыть предметы из набора экипировки",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Скрыть предметы, входящие в набор экипировки, чтобы избежать случайного распыления.",
+    FILTERED_EQUIPMENT_SET = "Набор экипировки",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "ЛКМ для открытия/закрытия",
     MINIMAP_TOOLTIP_RIGHT = "ПКМ для черного списка",

@@ -98,6 +98,11 @@ end
 function FilterPanel:HasActiveFilters()
     local filters = GetFilters()
 
+    -- Check equipment set filter (default: true = hidden, so false = active filter change)
+    if filters.hideEquipmentSets == false then
+        return true
+    end
+
     -- Check quality (default: all true)
     if not filters.quality[2] or not filters.quality[3] or not filters.quality[4] then
         return true
@@ -144,6 +149,7 @@ function FilterPanel:ResetFilters()
         ilvlMax = nil,
         goldMin = nil,
         goldMax = nil,
+        hideEquipmentSets = true,
     }
     SaveFilters(filters)
 
@@ -277,6 +283,23 @@ function FilterPanel:CreateSearchAndFilterBar(parent)
                 filterButton:ValidateResetState()
                 ScheduleRangeUpdate()
             end)
+        end)
+
+        rootDescription:CreateSpacer()
+
+        -- === Equipment Set filter ===
+        local equipSetCheckbox = rootDescription:CreateCheckbox(L.FILTER_HIDE_EQUIPMENT_SET, function()
+            local f = GetFilters()
+            return f.hideEquipmentSets ~= false
+        end, function()
+            local f = GetFilters()
+            f.hideEquipmentSets = not (f.hideEquipmentSets ~= false)
+            SaveFilters(f)
+            FilterPanel:NotifyChange()
+        end)
+        equipSetCheckbox:SetTooltip(function(tooltip, elementDescription)
+            GameTooltip_SetTitle(tooltip, L.FILTER_HIDE_EQUIPMENT_SET)
+            GameTooltip_AddNormalLine(tooltip, L.FILTER_EQUIPMENT_SET_TOOLTIP)
         end)
     end)
 

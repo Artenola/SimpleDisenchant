@@ -48,6 +48,9 @@ function Blacklist:Initialize()
                     goldMax = nil,
                 }
             end
+            if SimpleDisenchantDB.filters.hideEquipmentSets == nil then
+                SimpleDisenchantDB.filters.hideEquipmentSets = true
+            end
             if not SimpleDisenchantDB.minimap then
                 SimpleDisenchantDB.minimap = { angle = 225, hidden = false }
             end

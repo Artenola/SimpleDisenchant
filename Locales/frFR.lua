@@ -53,6 +53,11 @@ addon.L["frFR"] = {
     FILTER_ILVL_TOOLTIP = "Définir un niveau d'objet min/max. Vide = pas de limite.",
     FILTER_GOLD_TOOLTIP = "Définir un prix marchand min/max en or. Vide = pas de limite.",
 
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Masquer les objets d'un set d'equipement",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Masquer les objets appartenant a un set d'equipement pour eviter le desenchantement accidentel.",
+    FILTERED_EQUIPMENT_SET = "Set d'equipement",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic gauche pour ouvrir/fermer",
     MINIMAP_TOOLTIP_RIGHT = "Clic droit pour la liste noire",

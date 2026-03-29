@@ -223,6 +223,18 @@ function FilteredItemsFrame:Refresh()
     local dataProvider = CreateDataProvider()
     local totalCount = 0
 
+    -- Group: Equipment Set
+    if filtered.equipmentSet and #filtered.equipmentSet > 0 then
+        dataProvider:Insert({
+            isHeader = true,
+            headerText = L.FILTERED_EQUIPMENT_SET .. " (" .. #filtered.equipmentSet .. ")",
+        })
+        for _, item in ipairs(filtered.equipmentSet) do
+            dataProvider:Insert(item)
+            totalCount = totalCount + 1
+        end
+    end
+
     -- Group: Over Item Level
     if #filtered.overIlvl > 0 then
         dataProvider:Insert({
