@@ -284,6 +284,12 @@ function FilteredItemsFrame:Hide()
     if frame then frame:Hide() end
 end
 
+function FilteredItemsFrame:ResetPosition()
+    if not frame then return end
+    frame:ClearAllPoints()
+    frame:SetPoint("CENTER", 350, 0)
+end
+
 function FilteredItemsFrame:GetFrame()
     return frame
 end

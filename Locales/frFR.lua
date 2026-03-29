@@ -53,6 +53,9 @@ addon.L["frFR"] = {
     FILTER_ILVL_TOOLTIP = "Définir un niveau d'objet min/max. Vide = pas de limite.",
     FILTER_GOLD_TOOLTIP = "Définir un prix marchand min/max en or. Vide = pas de limite.",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "Toutes les positions de fenetres ont ete reinitialisees.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic gauche pour ouvrir/fermer",
     MINIMAP_TOOLTIP_RIGHT = "Clic droit pour la liste noire",

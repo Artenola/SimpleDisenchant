@@ -52,6 +52,9 @@ addon.L["deDE"] = {
     FILTER_ILVL_TOOLTIP = "Min/Max Gegenstandsstufe festlegen. Leer = keine Begrenzung.",
     FILTER_GOLD_TOOLTIP = "Min/Max Händlerpreis in Gold festlegen. Leer = keine Begrenzung.",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "Alle Fensterpositionen wurden zuruckgesetzt.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Linksklick zum Öffnen/Schließen",
     MINIMAP_TOOLTIP_RIGHT = "Rechtsklick für Sperrliste",

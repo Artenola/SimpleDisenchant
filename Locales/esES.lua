@@ -52,6 +52,9 @@ addon.L["esES"] = {
     FILTER_ILVL_TOOLTIP = "Establecer nivel de objeto mín/máx. Vacío = sin límite.",
     FILTER_GOLD_TOOLTIP = "Establecer precio de venta mín/máx en oro. Vacío = sin límite.",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "Todas las posiciones de ventanas han sido reiniciadas.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
     MINIMAP_TOOLTIP_RIGHT = "Clic derecho para lista negra",
