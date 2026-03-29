@@ -51,6 +51,9 @@ L["enUS"] = {
     FILTER_ILVL_TOOLTIP = "Set min/max item level. Leave empty for no limit.",
     FILTER_GOLD_TOOLTIP = "Set min/max vendor price in gold. Leave empty for no limit.",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "All window positions have been reset.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Left-click to toggle window",
     MINIMAP_TOOLTIP_RIGHT = "Right-click for blacklist",

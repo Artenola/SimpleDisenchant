@@ -52,6 +52,9 @@ addon.L["itIT"] = {
     FILTER_ILVL_TOOLTIP = "Imposta livello oggetto min/max. Vuoto = nessun limite.",
     FILTER_GOLD_TOOLTIP = "Imposta prezzo venditore min/max in oro. Vuoto = nessun limite.",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "Tutte le posizioni delle finestre sono state reimpostate.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic sinistro per aprire/chiudere",
     MINIMAP_TOOLTIP_RIGHT = "Clic destro per lista nera",

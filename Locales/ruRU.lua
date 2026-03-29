@@ -52,6 +52,9 @@ addon.L["ruRU"] = {
     FILTER_ILVL_TOOLTIP = "Задать мин/макс уровень предмета. Пусто = без ограничений.",
     FILTER_GOLD_TOOLTIP = "Задать мин/макс цену у торговца в золоте. Пусто = без ограничений.",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "Все позиции окон сброшены.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "ЛКМ для открытия/закрытия",
     MINIMAP_TOOLTIP_RIGHT = "ПКМ для черного списка",
