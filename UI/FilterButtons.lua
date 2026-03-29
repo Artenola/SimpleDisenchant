@@ -68,6 +68,14 @@ function FilterPanel:GetSearchText()
     return ""
 end
 
+function FilterPanel:IsItemTypeEnabled(itemType)
+    local filters = GetFilters()
+    if filters.itemTypes then
+        return filters.itemTypes[itemType] ~= false
+    end
+    return true
+end
+
 -- Check if an item passes the ilvl/gold filters
 -- Returns: passesIlvl, passesGold
 function FilterPanel:CheckItemFilters(itemLevel, sellPrice)
@@ -97,6 +105,13 @@ end
 -- Check if any filter differs from defaults
 function FilterPanel:HasActiveFilters()
     local filters = GetFilters()
+
+    -- Check item types (default: all true)
+    if filters.itemTypes then
+        if not filters.itemTypes.armor or not filters.itemTypes.weapon or not filters.itemTypes.profession then
+            return true
+        end
+    end
 
     -- Check quality (default: all true)
     if not filters.quality[2] or not filters.quality[3] or not filters.quality[4] then
@@ -144,6 +159,7 @@ function FilterPanel:ResetFilters()
         ilvlMax = nil,
         goldMin = nil,
         goldMax = nil,
+        itemTypes = { armor = true, weapon = true, profession = true },
     }
     SaveFilters(filters)
 
@@ -278,6 +294,34 @@ function FilterPanel:CreateSearchAndFilterBar(parent)
                 ScheduleRangeUpdate()
             end)
         end)
+
+        rootDescription:CreateSpacer()
+
+        -- === Item Type filter ===
+        local typeTitle = rootDescription:CreateTitle(L.FILTER_ITEM_TYPE)
+        typeTitle:SetTooltip(function(tooltip, elementDescription)
+            GameTooltip_SetTitle(tooltip, L.FILTER_ITEM_TYPE)
+            GameTooltip_AddNormalLine(tooltip, L.FILTER_ITEM_TYPE_TOOLTIP)
+        end)
+
+        local typeKeys = {
+            { key = "armor",      label = L.FILTER_TYPE_ARMOR },
+            { key = "weapon",     label = L.FILTER_TYPE_WEAPON },
+            { key = "profession", label = L.FILTER_TYPE_PROFESSION },
+        }
+        for _, typeInfo in ipairs(typeKeys) do
+            rootDescription:CreateCheckbox(typeInfo.label, function()
+                return FilterPanel:IsItemTypeEnabled(typeInfo.key)
+            end, function()
+                local f = GetFilters()
+                if not f.itemTypes then
+                    f.itemTypes = { armor = true, weapon = true, profession = true }
+                end
+                f.itemTypes[typeInfo.key] = not f.itemTypes[typeInfo.key]
+                SaveFilters(f)
+                FilterPanel:NotifyChange()
+            end)
+        end
     end)
 
     return searchBox, filterButton

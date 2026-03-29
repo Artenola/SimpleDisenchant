@@ -51,6 +51,13 @@ L["enUS"] = {
     FILTER_ILVL_TOOLTIP = "Set min/max item level. Leave empty for no limit.",
     FILTER_GOLD_TOOLTIP = "Set min/max vendor price in gold. Leave empty for no limit.",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Item Type",
+    FILTER_ITEM_TYPE_TOOLTIP = "Show or hide items by type. Uncheck a type to exclude it from the disenchant list.",
+    FILTER_TYPE_ARMOR = "Armor",
+    FILTER_TYPE_WEAPON = "Weapon",
+    FILTER_TYPE_PROFESSION = "Profession Equipment",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Left-click to toggle window",
     MINIMAP_TOOLTIP_RIGHT = "Right-click for blacklist",

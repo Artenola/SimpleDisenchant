@@ -52,6 +52,13 @@ addon.L["itIT"] = {
     FILTER_ILVL_TOOLTIP = "Imposta livello oggetto min/max. Vuoto = nessun limite.",
     FILTER_GOLD_TOOLTIP = "Imposta prezzo venditore min/max in oro. Vuoto = nessun limite.",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Tipo di oggetto",
+    FILTER_ITEM_TYPE_TOOLTIP = "Mostra o nascondi gli oggetti per tipo. Deseleziona un tipo per escluderlo dalla lista.",
+    FILTER_TYPE_ARMOR = "Armatura",
+    FILTER_TYPE_WEAPON = "Arma",
+    FILTER_TYPE_PROFESSION = "Equipaggiamento professione",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic sinistro per aprire/chiudere",
     MINIMAP_TOOLTIP_RIGHT = "Clic destro per lista nera",

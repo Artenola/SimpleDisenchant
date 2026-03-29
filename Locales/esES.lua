@@ -52,6 +52,13 @@ addon.L["esES"] = {
     FILTER_ILVL_TOOLTIP = "Establecer nivel de objeto mín/máx. Vacío = sin límite.",
     FILTER_GOLD_TOOLTIP = "Establecer precio de venta mín/máx en oro. Vacío = sin límite.",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Tipo de objeto",
+    FILTER_ITEM_TYPE_TOOLTIP = "Mostrar u ocultar objetos por tipo. Desmarca un tipo para excluirlo de la lista.",
+    FILTER_TYPE_ARMOR = "Armadura",
+    FILTER_TYPE_WEAPON = "Arma",
+    FILTER_TYPE_PROFESSION = "Equipo de profesion",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
     MINIMAP_TOOLTIP_RIGHT = "Clic derecho para lista negra",

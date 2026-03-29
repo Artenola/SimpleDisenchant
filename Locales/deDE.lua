@@ -52,6 +52,13 @@ addon.L["deDE"] = {
     FILTER_ILVL_TOOLTIP = "Min/Max Gegenstandsstufe festlegen. Leer = keine Begrenzung.",
     FILTER_GOLD_TOOLTIP = "Min/Max Händlerpreis in Gold festlegen. Leer = keine Begrenzung.",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Gegenstandstyp",
+    FILTER_ITEM_TYPE_TOOLTIP = "Gegenstände nach Typ ein- oder ausblenden. Typ abwählen um ihn auszuschließen.",
+    FILTER_TYPE_ARMOR = "Rüstung",
+    FILTER_TYPE_WEAPON = "Waffe",
+    FILTER_TYPE_PROFESSION = "Berufsausrüstung",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Linksklick zum Öffnen/Schließen",
     MINIMAP_TOOLTIP_RIGHT = "Rechtsklick für Sperrliste",
