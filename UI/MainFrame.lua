@@ -137,6 +137,12 @@ function MainFrame:IsShown()
     return frame and frame:IsShown()
 end
 
+function MainFrame:ResetPosition()
+    if not frame then return end
+    frame:ClearAllPoints()
+    frame:SetPoint("CENTER")
+end
+
 function MainFrame:SetCombatMode(inCombat)
     if not frame then return end
 

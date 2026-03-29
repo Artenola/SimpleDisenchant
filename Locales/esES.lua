@@ -58,6 +58,9 @@ addon.L["esES"] = {
     FILTER_BINDING_BOE = "Se liga al equipar",
     FILTER_BINDING_BOP = "Se liga al recoger",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "Todas las posiciones de ventanas han sido reiniciadas.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
     MINIMAP_TOOLTIP_RIGHT = "Clic derecho para lista negra",
