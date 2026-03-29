@@ -14,6 +14,7 @@ local Blacklist = addon.Blacklist
 local BlacklistFrame = addon.BlacklistFrame
 local FilteredItemsFrame = addon.FilteredItemsFrame
 local MinimapButton = addon.MinimapButton
+local DataBroker = addon.DataBroker
 
 -- Initialize addon
 local function Initialize()
@@ -34,6 +35,9 @@ local function Initialize()
 
     -- Initialize minimap button
     MinimapButton:Initialize()
+
+    -- Initialize LDB launcher (optional, requires LibDataBroker)
+    DataBroker:Initialize()
 
     -- Apply keybinding to disenchant button
     local function ApplyKeybinding()
