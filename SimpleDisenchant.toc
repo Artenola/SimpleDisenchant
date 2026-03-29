@@ -32,10 +32,15 @@ Locales\esES.lua
 Locales\itIT.lua
 Locales\ruRU.lua
 
+# Libs (optional, embedded by packager)
+Libs\LibStub\LibStub.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+
 # Core
 Core\Constants.lua
 Core\Utils.lua
 Core\Blacklist.lua
+Core\DataBroker.lua
 
 # UI
 UI\MainFrame.lua
