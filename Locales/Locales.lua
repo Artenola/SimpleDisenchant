@@ -59,6 +59,10 @@ L["enUS"] = {
 
     -- Reset positions
     RESET_POSITIONS_MSG = "All window positions have been reset.",
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Hide Equipment Set items",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Hide items that belong to an equipment set to prevent accidental disenchanting.",
+    FILTERED_EQUIPMENT_SET = "Equipment Set",
 
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Left-click to toggle window",

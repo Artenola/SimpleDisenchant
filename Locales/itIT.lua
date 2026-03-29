@@ -54,6 +54,10 @@ addon.L["itIT"] = {
 
     -- Reset positions
     RESET_POSITIONS_MSG = "Tutte le posizioni delle finestre sono state reimpostate.",
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Nascondi oggetti del set equipaggiamento",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Nascondi gli oggetti che appartengono a un set equipaggiamento per evitare di disincantarli per errore.",
+    FILTERED_EQUIPMENT_SET = "Set equipaggiamento",
 
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic sinistro per aprire/chiudere",
