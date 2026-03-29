@@ -59,6 +59,13 @@ addon.L["itIT"] = {
     FILTER_EQUIPMENT_SET_TOOLTIP = "Nascondi gli oggetti che appartengono a un set equipaggiamento per evitare di disincantarli per errore.",
     FILTERED_EQUIPMENT_SET = "Set equipaggiamento",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Tipo di oggetto",
+    FILTER_ITEM_TYPE_TOOLTIP = "Mostra o nascondi gli oggetti per tipo. Deseleziona un tipo per escluderlo dalla lista.",
+    FILTER_TYPE_ARMOR = "Armatura",
+    FILTER_TYPE_WEAPON = "Arma",
+    FILTER_TYPE_PROFESSION = "Equipaggiamento professione",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic sinistro per aprire/chiudere",
     MINIMAP_TOOLTIP_RIGHT = "Clic destro per lista nera",

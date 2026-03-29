@@ -370,11 +370,25 @@ function ItemList:ScanBags()
             local info = C_Container.GetContainerItemInfo(bag, slot)
             if info and info.hyperlink then
                 local itemName, _, quality, itemLevel, _, _, _, _, _, _, sellPrice, _, _, bindType = C_Item.GetItemInfo(info.hyperlink)
-                local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(info.hyperlink)
+                local _, _, _, _, _, classID, subClassID = C_Item.GetItemInfoInstant(info.hyperlink)
 
                 -- Armor or Weapon, green+ quality, quality filter active, and not blacklisted
                 local isBlacklisted = Blacklist and Blacklist:IsBlacklisted(info.hyperlink)
                 if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterPanel:IsQualityEnabled(quality) and FilterPanel:IsBindingTypeEnabled(bindType) and not isBlacklisted then
+
+                    -- Item type filter: determine category and check if enabled
+                    local itemTypeKey
+                    if classID == 4 and subClassID == C.ARMOR_SUBCLASS_PROFESSION then
+                        itemTypeKey = "profession"
+                    elseif classID == 4 then
+                        itemTypeKey = "armor"
+                    elseif classID == 2 then
+                        itemTypeKey = "weapon"
+                    end
+
+                    if not FilterPanel:IsItemTypeEnabled(itemTypeKey) then
+                        -- Skip this item (filtered by item type)
+                    else
 
                     -- Search filter: skip items that don't match search text
                     local matchesSearch = true
@@ -417,11 +431,12 @@ function ItemList:ScanBags()
                                 end
                             end
                         end
-                    end
-                end
-            end
-        end
-    end
+                    end -- matchesSearch
+                    end -- item type filter
+                end -- disenchantable check
+            end -- info.hyperlink
+        end -- slot loop
+    end -- bag loop
 
     -- Update ScrollBox with new data
     local dataProvider = CreateDataProvider()
