@@ -51,6 +51,11 @@ L["enUS"] = {
     FILTER_ILVL_TOOLTIP = "Set min/max item level. Leave empty for no limit.",
     FILTER_GOLD_TOOLTIP = "Set min/max vendor price in gold. Leave empty for no limit.",
 
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Hide Equipment Set items",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Hide items that belong to an equipment set to prevent accidental disenchanting.",
+    FILTERED_EQUIPMENT_SET = "Equipment Set",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Left-click to toggle window",
     MINIMAP_TOOLTIP_RIGHT = "Right-click for blacklist",

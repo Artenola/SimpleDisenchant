@@ -52,6 +52,11 @@ addon.L["esES"] = {
     FILTER_ILVL_TOOLTIP = "Establecer nivel de objeto mín/máx. Vacío = sin límite.",
     FILTER_GOLD_TOOLTIP = "Establecer precio de venta mín/máx en oro. Vacío = sin límite.",
 
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Ocultar objetos de set de equipo",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Ocultar objetos que pertenecen a un set de equipo para evitar desencantarlos por error.",
+    FILTERED_EQUIPMENT_SET = "Set de equipo",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
     MINIMAP_TOOLTIP_RIGHT = "Clic derecho para lista negra",

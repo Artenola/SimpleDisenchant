@@ -52,6 +52,11 @@ addon.L["itIT"] = {
     FILTER_ILVL_TOOLTIP = "Imposta livello oggetto min/max. Vuoto = nessun limite.",
     FILTER_GOLD_TOOLTIP = "Imposta prezzo venditore min/max in oro. Vuoto = nessun limite.",
 
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Nascondi oggetti del set equipaggiamento",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Nascondi gli oggetti che appartengono a un set equipaggiamento per evitare di disincantarli per errore.",
+    FILTERED_EQUIPMENT_SET = "Set equipaggiamento",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic sinistro per aprire/chiudere",
     MINIMAP_TOOLTIP_RIGHT = "Clic destro per lista nera",

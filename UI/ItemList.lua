@@ -12,10 +12,11 @@ local ItemList = addon.ItemList
 -- List of disenchantable items
 local disenchantList = {}
 
--- Filtered-out items (by ilvl/gold filters)
+-- Filtered-out items (by ilvl/gold/equipment set filters)
 local filteredItems = {
     overIlvl = {},
     overGold = {},
+    equipmentSet = {},
 }
 
 -- UI elements
@@ -327,8 +328,29 @@ function ItemList:ScanBags()
     wipe(disenchantList)
     wipe(filteredItems.overIlvl)
     wipe(filteredItems.overGold)
+    wipe(filteredItems.equipmentSet)
 
     local count = 0
+
+    -- Build equipment set lookup table: equipSetLookup[bag][slot] = setName
+    local equipSetLookup = {}
+    local hideEquipSets = SimpleDisenchantDB and SimpleDisenchantDB.filters and SimpleDisenchantDB.filters.hideEquipmentSets
+    if hideEquipSets then
+        local setIDs = C_EquipmentSet.GetEquipmentSetIDs()
+        for _, setID in ipairs(setIDs) do
+            local name = C_EquipmentSet.GetEquipmentSetInfo(setID)
+            local locations = C_EquipmentSet.GetItemLocations(setID)
+            for _, location in pairs(locations) do
+                if location and location > 0 then
+                    local _, _, bags, _, slot, bag = EquipmentManager_UnpackLocation(location)
+                    if bags and bag and slot then
+                        equipSetLookup[bag] = equipSetLookup[bag] or {}
+                        equipSetLookup[bag][slot] = name
+                    end
+                end
+            end
+        end
+    end
 
     -- Get search text for name filtering
     local searchText = FilterPanel:GetSearchText()
@@ -368,19 +390,26 @@ function ItemList:ScanBags()
                             sellPrice = sellPrice or 0,
                         }
 
-                        -- Check ilvl/gold filters
-                        local passesIlvl, passesGold = FilterPanel:CheckItemFilters(itemLevel, sellPrice)
-
-                        if passesIlvl and passesGold then
-                            count = count + 1
-                            table.insert(disenchantList, itemData)
+                        -- Check equipment set filter
+                        local inEquipSet = equipSetLookup[bag] and equipSetLookup[bag][slot]
+                        if inEquipSet then
+                            itemData.equipmentSetName = inEquipSet
+                            table.insert(filteredItems.equipmentSet, itemData)
                         else
-                            -- Add to filtered-out lists (item can appear in both)
-                            if not passesIlvl then
-                                table.insert(filteredItems.overIlvl, itemData)
-                            end
-                            if not passesGold then
-                                table.insert(filteredItems.overGold, itemData)
+                            -- Check ilvl/gold filters
+                            local passesIlvl, passesGold = FilterPanel:CheckItemFilters(itemLevel, sellPrice)
+
+                            if passesIlvl and passesGold then
+                                count = count + 1
+                                table.insert(disenchantList, itemData)
+                            else
+                                -- Add to filtered-out lists (item can appear in both)
+                                if not passesIlvl then
+                                    table.insert(filteredItems.overIlvl, itemData)
+                                end
+                                if not passesGold then
+                                    table.insert(filteredItems.overGold, itemData)
+                                end
                             end
                         end
                     end
