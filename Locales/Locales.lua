@@ -57,6 +57,9 @@ L["enUS"] = {
     FILTER_BINDING_BOE = "Bind on Equip",
     FILTER_BINDING_BOP = "Bind on Pickup",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "All window positions have been reset.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Left-click to toggle window",
     MINIMAP_TOOLTIP_RIGHT = "Right-click for blacklist",

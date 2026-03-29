@@ -92,6 +92,12 @@ SlashCmdList["SIMPLEDISENCHANT"] = function(msg)
         FilteredItemsFrame:Toggle()
     elseif cmd == "minimap" then
         MinimapButton:Toggle()
+    elseif cmd == "reset" then
+        -- Reset all window positions to defaults
+        MainFrame:ResetPosition()
+        BlacklistFrame:ResetPosition()
+        FilteredItemsFrame:ResetPosition()
+        Utils:Print(L.RESET_POSITIONS_MSG)
     else
         -- Default: toggle main frame
         MainFrame:Toggle()

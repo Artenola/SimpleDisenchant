@@ -59,6 +59,9 @@ addon.L["frFR"] = {
     FILTER_BINDING_BOE = "Lié quand équipé",
     FILTER_BINDING_BOP = "Lié quand ramassé",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "Toutes les positions de fenetres ont ete reinitialisees.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic gauche pour ouvrir/fermer",
     MINIMAP_TOOLTIP_RIGHT = "Clic droit pour la liste noire",
