@@ -23,6 +23,9 @@ C.DISENCHANTABLE_CLASSES = {
     [4] = true,  -- Armor
 }
 
+-- Armor subclass IDs for item type filtering
+C.ARMOR_SUBCLASS_PROFESSION = 11  -- Profession equipment
+
 -- Minimum quality for disenchanting
 C.MIN_DISENCHANT_QUALITY = 2  -- Green
 

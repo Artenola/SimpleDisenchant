@@ -55,6 +55,9 @@ function Blacklist:Initialize()
             if SimpleDisenchantDB.filters.hideEquipmentSets == nil then
                 SimpleDisenchantDB.filters.hideEquipmentSets = true
             end
+            if not SimpleDisenchantDB.filters.itemTypes then
+                SimpleDisenchantDB.filters.itemTypes = { armor = true, weapon = true, profession = true }
+            end
             if not SimpleDisenchantDB.minimap then
                 SimpleDisenchantDB.minimap = { angle = 225, hidden = false }
             end

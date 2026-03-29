@@ -65,6 +65,13 @@ addon.L["ruRU"] = {
     FILTER_EQUIPMENT_SET_TOOLTIP = "Скрыть предметы, входящие в набор экипировки, чтобы избежать случайного распыления.",
     FILTERED_EQUIPMENT_SET = "Набор экипировки",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Тип предмета",
+    FILTER_ITEM_TYPE_TOOLTIP = "Показать или скрыть предметы по типу. Снимите флажок, чтобы исключить тип из списка.",
+    FILTER_TYPE_ARMOR = "Броня",
+    FILTER_TYPE_WEAPON = "Оружие",
+    FILTER_TYPE_PROFESSION = "Экипировка профессии",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "ЛКМ для открытия/закрытия",
     MINIMAP_TOOLTIP_RIGHT = "ПКМ для черного списка",

@@ -65,6 +65,13 @@ addon.L["deDE"] = {
     FILTER_EQUIPMENT_SET_TOOLTIP = "Gegenstände eines Ausrüstungssets ausblenden, um versehentliches Entzaubern zu vermeiden.",
     FILTERED_EQUIPMENT_SET = "Ausrüstungsset",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Gegenstandstyp",
+    FILTER_ITEM_TYPE_TOOLTIP = "Gegenstände nach Typ ein- oder ausblenden. Typ abwählen um ihn auszuschließen.",
+    FILTER_TYPE_ARMOR = "Rüstung",
+    FILTER_TYPE_WEAPON = "Waffe",
+    FILTER_TYPE_PROFESSION = "Berufsausrüstung",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Linksklick zum Öffnen/Schließen",
     MINIMAP_TOOLTIP_RIGHT = "Rechtsklick für Sperrliste",

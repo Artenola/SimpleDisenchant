@@ -65,6 +65,13 @@ addon.L["esES"] = {
     FILTER_EQUIPMENT_SET_TOOLTIP = "Ocultar objetos que pertenecen a un set de equipo para evitar desencantarlos por error.",
     FILTERED_EQUIPMENT_SET = "Set de equipo",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Tipo de objeto",
+    FILTER_ITEM_TYPE_TOOLTIP = "Mostrar u ocultar objetos por tipo. Desmarca un tipo para excluirlo de la lista.",
+    FILTER_TYPE_ARMOR = "Armadura",
+    FILTER_TYPE_WEAPON = "Arma",
+    FILTER_TYPE_PROFESSION = "Equipo de profesion",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
     MINIMAP_TOOLTIP_RIGHT = "Clic derecho para lista negra",

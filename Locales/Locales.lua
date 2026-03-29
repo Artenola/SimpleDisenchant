@@ -64,6 +64,13 @@ L["enUS"] = {
     FILTER_EQUIPMENT_SET_TOOLTIP = "Hide items that belong to an equipment set to prevent accidental disenchanting.",
     FILTERED_EQUIPMENT_SET = "Equipment Set",
 
+    -- Item type filter
+    FILTER_ITEM_TYPE = "Item Type",
+    FILTER_ITEM_TYPE_TOOLTIP = "Show or hide items by type. Uncheck a type to exclude it from the disenchant list.",
+    FILTER_TYPE_ARMOR = "Armor",
+    FILTER_TYPE_WEAPON = "Weapon",
+    FILTER_TYPE_PROFESSION = "Profession Equipment",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Left-click to toggle window",
     MINIMAP_TOOLTIP_RIGHT = "Right-click for blacklist",
