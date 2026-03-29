@@ -60,6 +60,10 @@ addon.L["ruRU"] = {
 
     -- Reset positions
     RESET_POSITIONS_MSG = "Все позиции окон сброшены.",
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Скрыть предметы из набора экипировки",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Скрыть предметы, входящие в набор экипировки, чтобы избежать случайного распыления.",
+    FILTERED_EQUIPMENT_SET = "Набор экипировки",
 
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "ЛКМ для открытия/закрытия",

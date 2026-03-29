@@ -61,6 +61,10 @@ addon.L["frFR"] = {
 
     -- Reset positions
     RESET_POSITIONS_MSG = "Toutes les positions de fenetres ont ete reinitialisees.",
+    -- Equipment set filter
+    FILTER_HIDE_EQUIPMENT_SET = "Masquer les objets d'un set d'equipement",
+    FILTER_EQUIPMENT_SET_TOOLTIP = "Masquer les objets appartenant a un set d'equipement pour eviter le desenchantement accidentel.",
+    FILTERED_EQUIPMENT_SET = "Set d'equipement",
 
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic gauche pour ouvrir/fermer",
