@@ -58,6 +58,9 @@ addon.L["ruRU"] = {
     FILTER_BINDING_BOE = "При надевании",
     FILTER_BINDING_BOP = "При получении",
 
+    -- Reset positions
+    RESET_POSITIONS_MSG = "Все позиции окон сброшены.",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "ЛКМ для открытия/закрытия",
     MINIMAP_TOOLTIP_RIGHT = "ПКМ для черного списка",

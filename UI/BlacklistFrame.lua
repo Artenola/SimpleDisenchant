@@ -281,6 +281,12 @@ function BlacklistFrame:Hide()
     end
 end
 
+function BlacklistFrame:ResetPosition()
+    if not frame then return end
+    frame:ClearAllPoints()
+    frame:SetPoint("CENTER", 350, 0)
+end
+
 function BlacklistFrame:GetFrame()
     return frame
 end
