@@ -53,6 +53,12 @@ addon.L["frFR"] = {
     FILTER_ILVL_TOOLTIP = "Définir un niveau d'objet min/max. Vide = pas de limite.",
     FILTER_GOLD_TOOLTIP = "Définir un prix marchand min/max en or. Vide = pas de limite.",
 
+    -- Binding type filter
+    FILTER_BINDING_TYPE = "Type de lien",
+    FILTER_BINDING_TYPE_TOOLTIP = "Inclure ou exclure les objets par type de lien",
+    FILTER_BINDING_BOE = "Lié quand équipé",
+    FILTER_BINDING_BOP = "Lié quand ramassé",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic gauche pour ouvrir/fermer",
     MINIMAP_TOOLTIP_RIGHT = "Clic droit pour la liste noire",
