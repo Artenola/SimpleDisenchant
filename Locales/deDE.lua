@@ -52,6 +52,12 @@ addon.L["deDE"] = {
     FILTER_ILVL_TOOLTIP = "Min/Max Gegenstandsstufe festlegen. Leer = keine Begrenzung.",
     FILTER_GOLD_TOOLTIP = "Min/Max Händlerpreis in Gold festlegen. Leer = keine Begrenzung.",
 
+    -- Binding type filter
+    FILTER_BINDING_TYPE = "Bindungstyp",
+    FILTER_BINDING_TYPE_TOOLTIP = "Gegenstände nach Bindungstyp ein- oder ausschließen",
+    FILTER_BINDING_BOE = "Beim Anlegen gebunden",
+    FILTER_BINDING_BOP = "Beim Aufheben gebunden",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Linksklick zum Öffnen/Schließen",
     MINIMAP_TOOLTIP_RIGHT = "Rechtsklick für Sperrliste",

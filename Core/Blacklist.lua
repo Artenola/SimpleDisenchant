@@ -46,7 +46,11 @@ function Blacklist:Initialize()
                     ilvlMax = nil,
                     goldMin = nil,
                     goldMax = nil,
+                    bindingType = { boe = true, bop = true },
                 }
+            end
+            if not SimpleDisenchantDB.filters.bindingType then
+                SimpleDisenchantDB.filters.bindingType = { boe = true, bop = true }
             end
             if not SimpleDisenchantDB.minimap then
                 SimpleDisenchantDB.minimap = { angle = 225, hidden = false }

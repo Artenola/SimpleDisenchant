@@ -342,12 +342,12 @@ function ItemList:ScanBags()
         for slot = 1, numSlots do
             local info = C_Container.GetContainerItemInfo(bag, slot)
             if info and info.hyperlink then
-                local itemName, _, quality, itemLevel, _, _, _, _, _, _, sellPrice = C_Item.GetItemInfo(info.hyperlink)
+                local itemName, _, quality, itemLevel, _, _, _, _, _, _, sellPrice, _, _, bindType = C_Item.GetItemInfo(info.hyperlink)
                 local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(info.hyperlink)
 
                 -- Armor or Weapon, green+ quality, quality filter active, and not blacklisted
                 local isBlacklisted = Blacklist and Blacklist:IsBlacklisted(info.hyperlink)
-                if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterPanel:IsQualityEnabled(quality) and not isBlacklisted then
+                if C.DISENCHANTABLE_CLASSES[classID] and quality and quality >= C.MIN_DISENCHANT_QUALITY and FilterPanel:IsQualityEnabled(quality) and FilterPanel:IsBindingTypeEnabled(bindType) and not isBlacklisted then
 
                     -- Search filter: skip items that don't match search text
                     local matchesSearch = true

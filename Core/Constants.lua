@@ -46,6 +46,11 @@ C.DEFAULT_FILTERS = {
     goldMax = nil,
 }
 
+-- Binding types (from C_Item.GetItemInfo return #14)
+C.BIND_TYPE_BOE = 2  -- Bind on Equip
+C.BIND_TYPE_BOP = 1  -- Bind on Pickup
+C.BIND_TYPE_BOU = 3  -- Bind on Use (treated as BoE for filtering)
+
 -- Gold conversion
 C.COPPER_PER_GOLD = 10000
 C.COPPER_PER_SILVER = 100

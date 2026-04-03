@@ -52,6 +52,12 @@ addon.L["esES"] = {
     FILTER_ILVL_TOOLTIP = "Establecer nivel de objeto mín/máx. Vacío = sin límite.",
     FILTER_GOLD_TOOLTIP = "Establecer precio de venta mín/máx en oro. Vacío = sin límite.",
 
+    -- Binding type filter
+    FILTER_BINDING_TYPE = "Tipo de ligadura",
+    FILTER_BINDING_TYPE_TOOLTIP = "Incluir o excluir objetos por tipo de ligadura",
+    FILTER_BINDING_BOE = "Se liga al equipar",
+    FILTER_BINDING_BOP = "Se liga al recoger",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "Clic izquierdo para abrir/cerrar",
     MINIMAP_TOOLTIP_RIGHT = "Clic derecho para lista negra",

@@ -61,6 +61,17 @@ function FilterPanel:GetGoldMax()
     return GetFilters().goldMax
 end
 
+function FilterPanel:IsBindingTypeEnabled(bindType)
+    local filters = GetFilters()
+    if not filters.bindingType then return true end
+    if bindType == C.BIND_TYPE_BOP then
+        return filters.bindingType.bop
+    else
+        -- BoE, BoU, and anything else treated as BoE
+        return filters.bindingType.boe
+    end
+end
+
 function FilterPanel:GetSearchText()
     if searchBox then
         return searchBox:GetText()
@@ -113,6 +124,11 @@ function FilterPanel:HasActiveFilters()
         return true
     end
 
+    -- Check binding type (default: all true)
+    if filters.bindingType and (not filters.bindingType.boe or not filters.bindingType.bop) then
+        return true
+    end
+
     return false
 end
 
@@ -144,6 +160,7 @@ function FilterPanel:ResetFilters()
         ilvlMax = nil,
         goldMin = nil,
         goldMax = nil,
+        bindingType = { boe = true, bop = true },
     }
     SaveFilters(filters)
 
@@ -208,6 +225,30 @@ function FilterPanel:CreateSearchAndFilterBar(parent)
             end, function()
                 local f = GetFilters()
                 f.quality[quality] = not f.quality[quality]
+                SaveFilters(f)
+                FilterPanel:NotifyChange()
+            end)
+        end
+
+        rootDescription:CreateSpacer()
+
+        -- === Binding Type section ===
+        local bindTitle = rootDescription:CreateTitle(L.FILTER_BINDING_TYPE)
+        bindTitle:SetTooltip(function(tooltip, elementDescription)
+            GameTooltip_SetTitle(tooltip, L.FILTER_BINDING_TYPE)
+            GameTooltip_AddNormalLine(tooltip, L.FILTER_BINDING_TYPE_TOOLTIP)
+        end)
+        for _, bindInfo in ipairs({
+            { key = "boe", label = L.FILTER_BINDING_BOE },
+            { key = "bop", label = L.FILTER_BINDING_BOP },
+        }) do
+            rootDescription:CreateCheckbox(bindInfo.label, function()
+                local f = GetFilters()
+                return f.bindingType and f.bindingType[bindInfo.key]
+            end, function()
+                local f = GetFilters()
+                if not f.bindingType then f.bindingType = { boe = true, bop = true } end
+                f.bindingType[bindInfo.key] = not f.bindingType[bindInfo.key]
                 SaveFilters(f)
                 FilterPanel:NotifyChange()
             end)
