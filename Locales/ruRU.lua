@@ -52,6 +52,12 @@ addon.L["ruRU"] = {
     FILTER_ILVL_TOOLTIP = "Задать мин/макс уровень предмета. Пусто = без ограничений.",
     FILTER_GOLD_TOOLTIP = "Задать мин/макс цену у торговца в золоте. Пусто = без ограничений.",
 
+    -- Binding type filter
+    FILTER_BINDING_TYPE = "Тип привязки",
+    FILTER_BINDING_TYPE_TOOLTIP = "Включить или исключить предметы по типу привязки",
+    FILTER_BINDING_BOE = "При надевании",
+    FILTER_BINDING_BOP = "При получении",
+
     -- Minimap button
     MINIMAP_TOOLTIP_LEFT = "ЛКМ для открытия/закрытия",
     MINIMAP_TOOLTIP_RIGHT = "ПКМ для черного списка",
