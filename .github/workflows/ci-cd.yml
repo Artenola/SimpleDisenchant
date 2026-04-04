@@ -32,37 +32,33 @@ jobs:
           echo "Latest tag: ${LATEST_TAG:-none}"
 
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            # ── Release ──
+            # ── Release: version from tag ──
             VERSION="${GITHUB_REF#refs/tags/v}"
             echo "type=release" >> $GITHUB_OUTPUT
 
-          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            # ── Beta: last tag patch+1, append -beta+short_sha ──
+          elif [[ -n "$LATEST_TAG" ]]; then
+            # ── Alpha/Beta: last tag patch+1 ──
             BASE="${LATEST_TAG#v}"
             MAJOR=$(echo "$BASE" | cut -d. -f1)
             MINOR=$(echo "$BASE" | cut -d. -f2)
             PATCH=$(echo "$BASE" | cut -d. -f3)
             SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-beta+${SHORT_SHA}"
-            echo "type=beta" >> $GITHUB_OUTPUT
+            NEXT_PATCH="${MAJOR}.${MINOR}.$((PATCH + 1))"
 
-          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            # ── Alpha: last tag minor+1 + short SHA ──
-            BASE="${LATEST_TAG#v}"
-            MAJOR=$(echo "$BASE" | cut -d. -f1)
-            MINOR=$(echo "$BASE" | cut -d. -f2)
-            SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="${MAJOR}.$((MINOR + 1)).0-alpha+${SHORT_SHA}"
-            echo "type=alpha" >> $GITHUB_OUTPUT
+            if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+              VERSION="${NEXT_PATCH}-beta+${SHORT_SHA}"
+              echo "type=beta" >> $GITHUB_OUTPUT
+            elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+              VERSION="${NEXT_PATCH}-alpha+${SHORT_SHA}"
+              echo "type=alpha" >> $GITHUB_OUTPUT
+            else
+              VERSION="${NEXT_PATCH}-alpha+${SHORT_SHA}"
+              echo "type=dry-run" >> $GITHUB_OUTPUT
+            fi
 
           else
-            # ── Feature: same as alpha, dry-run ──
-            BASE="${LATEST_TAG#v}"
-            MAJOR=$(echo "$BASE" | cut -d. -f1)
-            MINOR=$(echo "$BASE" | cut -d. -f2)
-            SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="${MAJOR}.$((MINOR + 1)).0-alpha+${SHORT_SHA}"
-            echo "type=dry-run" >> $GITHUB_OUTPUT
+            VERSION="0.1.0"
+            echo "type=alpha" >> $GITHUB_OUTPUT
           fi
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
