@@ -54,6 +54,22 @@ jobs:
           fi
           echo "CHANGELOG OK pour $VERSION"
 
+      - name: Generate changelog summary
+        if: github.event_name != 'release'
+        run: |
+          echo "## Changes in this build" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            # Beta (tag): extract CHANGELOG section for this version
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1 >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "No CHANGELOG entry for $VERSION" >> $GITHUB_STEP_SUMMARY
+          else
+            # Alpha (develop/feature): list recent commits
+            echo "**Recent commits:**" >> $GITHUB_STEP_SUMMARY
+            git log --oneline -15 --no-merges --pretty=format:"- %s" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
       - name: Set package args
         id: pkg
         run: |
