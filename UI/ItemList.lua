@@ -279,6 +279,8 @@ function ItemList:CreateScrollList(parent)
                     ItemList:ScanBags()
                 end
             else
+                -- Re-scan to rebuild clean list, then move selected item to position 1
+                ItemList:ScanBags()
                 for i, item in ipairs(disenchantList) do
                     if item.bag == self.itemBag and item.slot == self.itemSlot then
                         table.remove(disenchantList, i)
@@ -286,7 +288,7 @@ function ItemList:CreateScrollList(parent)
                         break
                     end
                 end
-                ItemList:UpdateDisenchantButton()
+                ItemList:RefreshDisplay()
             end
         end)
     end)
