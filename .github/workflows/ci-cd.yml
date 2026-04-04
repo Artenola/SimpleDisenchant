@@ -47,11 +47,12 @@ jobs:
             echo "type=beta" >> $GITHUB_OUTPUT
 
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            # ── Alpha: last tag minor+1 ──
+            # ── Alpha: last tag minor+1 + short SHA ──
             BASE="${LATEST_TAG#v}"
             MAJOR=$(echo "$BASE" | cut -d. -f1)
             MINOR=$(echo "$BASE" | cut -d. -f2)
-            VERSION="${MAJOR}.$((MINOR + 1)).0"
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${MAJOR}.$((MINOR + 1)).0-alpha+${SHORT_SHA}"
             echo "type=alpha" >> $GITHUB_OUTPUT
 
           else
@@ -59,7 +60,8 @@ jobs:
             BASE="${LATEST_TAG#v}"
             MAJOR=$(echo "$BASE" | cut -d. -f1)
             MINOR=$(echo "$BASE" | cut -d. -f2)
-            VERSION="${MAJOR}.$((MINOR + 1)).0"
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${MAJOR}.$((MINOR + 1)).0-alpha+${SHORT_SHA}"
             echo "type=dry-run" >> $GITHUB_OUTPUT
           fi
 
@@ -105,14 +107,10 @@ jobs:
           TYPE="${{ steps.version.outputs.type }}"
           VERSION="${{ steps.version.outputs.version }}"
 
-          if [[ "$TYPE" == "release" ]]; then
-            echo "args=-n SimpleDisenchant-${VERSION}" >> $GITHUB_OUTPUT
-          elif [[ "$TYPE" == "beta" ]]; then
-            echo "args=-n SimpleDisenchant-${VERSION}" >> $GITHUB_OUTPUT
-          elif [[ "$TYPE" == "alpha" ]]; then
-            echo "args=-n SimpleDisenchant-${VERSION}-alpha" >> $GITHUB_OUTPUT
+          if [[ "$TYPE" == "dry-run" ]]; then
+            echo "args=-d -n SimpleDisenchant-${VERSION}" >> $GITHUB_OUTPUT
           else
-            echo "args=-d -n SimpleDisenchant-${VERSION}-alpha" >> $GITHUB_OUTPUT
+            echo "args=-n SimpleDisenchant-${VERSION}" >> $GITHUB_OUTPUT
           fi
 
       - name: Package & Publish
