@@ -4,6 +4,7 @@ enable-nolib-creation: no
 
 ignore:
   - .git
+  - .github
   - .gitignore
   - .claude
   - "*.md"
