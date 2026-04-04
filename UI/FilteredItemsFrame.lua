@@ -287,7 +287,15 @@ end
 function FilteredItemsFrame:ResetPosition()
     if not frame then return end
     frame:ClearAllPoints()
-    frame:SetPoint("CENTER", 350, 0)
+    local blFrame = addon.BlacklistFrame:GetFrame()
+    local mainFrame = addon.MainFrame:GetFrame()
+    if blFrame and blFrame:IsShown() then
+        frame:SetPoint("TOPLEFT", blFrame, "TOPRIGHT", 5, 0)
+    elseif mainFrame and mainFrame:IsShown() then
+        frame:SetPoint("TOPLEFT", mainFrame, "TOPRIGHT", 5, 0)
+    else
+        frame:SetPoint("CENTER")
+    end
 end
 
 function FilteredItemsFrame:GetFrame()
