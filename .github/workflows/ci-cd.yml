@@ -103,10 +103,11 @@ jobs:
           TYPE="${{ steps.version.outputs.type }}"
           VERSION="${{ steps.version.outputs.version }}"
 
+          LABEL="v${VERSION}"
           if [[ "$TYPE" == "dry-run" ]]; then
-            echo "args=-d -n SimpleDisenchant-${VERSION}" >> $GITHUB_OUTPUT
+            echo "args=-d -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
           else
-            echo "args=-n SimpleDisenchant-${VERSION}" >> $GITHUB_OUTPUT
+            echo "args=-n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
           fi
 
       - name: Package & Publish
