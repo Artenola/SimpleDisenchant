@@ -103,10 +103,16 @@ jobs:
         id: pkg
         run: |
           TYPE="${{ steps.version.outputs.type }}"
-          if [[ "$TYPE" == "dry-run" ]]; then
-            echo "args=-d" >> $GITHUB_OUTPUT
+          VERSION="${{ steps.version.outputs.version }}"
+
+          if [[ "$TYPE" == "release" ]]; then
+            echo "args=-n SimpleDisenchant-${VERSION}" >> $GITHUB_OUTPUT
+          elif [[ "$TYPE" == "beta" ]]; then
+            echo "args=-n SimpleDisenchant-${VERSION}" >> $GITHUB_OUTPUT
+          elif [[ "$TYPE" == "alpha" ]]; then
+            echo "args=-n SimpleDisenchant-${VERSION}-alpha" >> $GITHUB_OUTPUT
           else
-            echo "args=" >> $GITHUB_OUTPUT
+            echo "args=-d -n SimpleDisenchant-${VERSION}-alpha" >> $GITHUB_OUTPUT
           fi
 
       - name: Package & Publish
