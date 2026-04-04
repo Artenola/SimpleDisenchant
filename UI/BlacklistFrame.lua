@@ -284,7 +284,12 @@ end
 function BlacklistFrame:ResetPosition()
     if not frame then return end
     frame:ClearAllPoints()
-    frame:SetPoint("CENTER", 350, 0)
+    local mainFrame = addon.MainFrame:GetFrame()
+    if mainFrame and mainFrame:IsShown() then
+        frame:SetPoint("TOPLEFT", mainFrame, "TOPRIGHT", 5, 0)
+    else
+        frame:SetPoint("CENTER")
+    end
 end
 
 function BlacklistFrame:GetFrame()
