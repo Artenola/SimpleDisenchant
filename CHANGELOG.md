@@ -17,8 +17,6 @@ All notable changes to SimpleDisenchant will be documented in this file.
   - Shift-click: toggle minimap button
   - Graceful fallback if LibDataBroker is not available
 - **Reset window positions** (Issue #36): `/sde reset` command to re-dock all windows to their default positions
-- **CI/CD overhaul**: Unified workflow with SonarCloud analysis, conditional packaging (dry-run on features, alpha on develop, beta on tags, release on GitHub release), and changelog summary in build output
-- **Local dev tooling**: `install-libs.ps1` script for downloading library dependencies
 
 ### Fixed
 - Window overlap: Blacklist and Filtered Items frames now dock correctly instead of stacking
