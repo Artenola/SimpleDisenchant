@@ -35,6 +35,23 @@ jobs:
           fi
           echo "CHANGELOG OK pour $VERSION"
 
+      - name: Compute and set next version
+        if: github.event_name != 'release'
+        run: |
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          elif [[ -n "$LATEST_TAG" ]]; then
+            BASE="${LATEST_TAG#v}"
+            MAJOR=$(echo "$BASE" | cut -d. -f1)
+            MINOR=$(echo "$BASE" | cut -d. -f2)
+            VERSION="${MAJOR}.$((MINOR + 1)).0"
+          else
+            VERSION="0.1.0"
+          fi
+          echo "Setting TOC version to $VERSION"
+          sed -i "s/^## Version: .*/## Version: $VERSION/" SimpleDisenchant.toc
+
       - name: Generate changelog summary
         if: github.event_name != 'release'
         run: |
