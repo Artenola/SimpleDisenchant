@@ -378,7 +378,7 @@ function ItemList:ScanBags()
 
                     -- Item type filter: determine category and check if enabled
                     local itemTypeKey
-                    if classID == 4 and subClassID == C.ARMOR_SUBCLASS_PROFESSION then
+                    if classID == C.ITEM_CLASS_PROFESSION then
                         itemTypeKey = "profession"
                     elseif classID == 4 then
                         itemTypeKey = "armor"

@@ -19,12 +19,13 @@ C.QUALITY_COLORS = {
 
 -- Item class IDs that can be disenchanted
 C.DISENCHANTABLE_CLASSES = {
-    [2] = true,  -- Weapons
-    [4] = true,  -- Armor
+    [2] = true,   -- Weapons
+    [4] = true,   -- Armor
+    [19] = true,  -- Profession equipment
 }
 
--- Armor subclass IDs for item type filtering
-C.ARMOR_SUBCLASS_PROFESSION = 11  -- Profession equipment
+-- Item class ID for profession equipment
+C.ITEM_CLASS_PROFESSION = 19
 
 -- Minimum quality for disenchanting
 C.MIN_DISENCHANT_QUALITY = 2  -- Green
