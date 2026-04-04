@@ -38,9 +38,11 @@ jobs:
       - name: Compute and set next version
         if: github.event_name != 'release'
         run: |
-          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
+            # Strip beta/alpha suffix for TOC
+            VERSION="${VERSION%%-*}"
           elif [[ -n "$LATEST_TAG" ]]; then
             BASE="${LATEST_TAG#v}"
             MAJOR=$(echo "$BASE" | cut -d. -f1)
@@ -59,6 +61,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
+            VERSION="${VERSION%%-*}"
             sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1 >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "No CHANGELOG entry for $VERSION" >> $GITHUB_STEP_SUMMARY
           else
             echo "**Recent commits:**" >> $GITHUB_STEP_SUMMARY
@@ -74,16 +77,19 @@ jobs:
             echo "publish=true" >> $GITHUB_OUTPUT
 
           elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "args=-r beta" >> $GITHUB_OUTPUT
+            # Tag push = beta (packager auto-detects tagged HEAD as release,
+            # but beta tags like v1.6.0-beta1 produce beta type)
+            echo "args=" >> $GITHUB_OUTPUT
             echo "publish=true" >> $GITHUB_OUTPUT
 
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "args=-r alpha" >> $GITHUB_OUTPUT
+            # Develop = alpha (untagged = alpha automatically)
+            echo "args=" >> $GITHUB_OUTPUT
             echo "publish=true" >> $GITHUB_OUTPUT
 
           else
-            # feature/** : -d = skip upload (dry-run packager)
-            echo "args=-d -r alpha" >> $GITHUB_OUTPUT
+            # feature/** : -d = skip upload (dry-run)
+            echo "args=-d" >> $GITHUB_OUTPUT
             echo "publish=false" >> $GITHUB_OUTPUT
           fi
 
