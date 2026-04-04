@@ -2,7 +2,7 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
-## [Unreleased]
+## [1.6.0] - 2026-04-04
 
 ### Added
 - **Binding Type filter** (Issue #38): Filter items by Bind on Equip (BoE) or Bind on Pickup (BoP)
