@@ -436,6 +436,17 @@ function ItemList:ScanBags()
     end
 end
 
+function ItemList:RefreshDisplay()
+    local L = addon.currentLocale
+    local dataProvider = CreateDataProvider()
+    for _, item in ipairs(disenchantList) do
+        dataProvider:Insert(item)
+    end
+    scrollBox:SetDataProvider(dataProvider)
+    countText:SetText(string.format(L.ITEMS_COUNT, #disenchantList))
+    self:UpdateDisenchantButton()
+end
+
 function ItemList:Initialize(parent)
     self:CreateIconFrame(parent)
     self:CreateDisenchantButton(parent)
