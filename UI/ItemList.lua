@@ -446,4 +446,13 @@ function ItemList:Initialize(parent)
     FilterPanel:SetCallback(function()
         self:ScanBags()
     end)
+
+    -- Re-scan when equipment sets change (created, deleted, modified)
+    local eventFrame = CreateFrame("Frame")
+    eventFrame:RegisterEvent("EQUIPMENT_SETS_CHANGED")
+    eventFrame:SetScript("OnEvent", function()
+        if addon.MainFrame:IsShown() and not InCombatLockdown() then
+            self:ScanBags()
+        end
+    end)
 end
