@@ -35,6 +35,40 @@ jobs:
           fi
           echo "CHANGELOG OK pour $VERSION"
 
+      - name: Compute next version for alpha/beta
+        if: github.event_name != 'release'
+        id: version
+        run: |
+          # Get latest tag (sorted by version)
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
+          echo "Latest tag: $LATEST_TAG"
+
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            # Beta: use the tag version as-is
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          elif [[ -n "$LATEST_TAG" ]]; then
+            # Alpha: increment minor version from latest tag
+            BASE="${LATEST_TAG#v}"
+            MAJOR=$(echo "$BASE" | cut -d. -f1)
+            MINOR=$(echo "$BASE" | cut -d. -f2)
+            PATCH=$(echo "$BASE" | cut -d. -f3)
+            NEXT_MINOR=$((MINOR + 1))
+            VERSION="${MAJOR}.${NEXT_MINOR}.0"
+          else
+            VERSION="0.1.0"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Computed version: $VERSION"
+
+      - name: Update TOC version for alpha/beta
+        if: github.event_name != 'release'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          sed -i "s/^## Version: .*/## Version: $VERSION/" SimpleDisenchant.toc
+          echo "TOC version set to $VERSION"
+          grep "## Version" SimpleDisenchant.toc
+
       - name: Generate changelog summary
         if: github.event_name != 'release'
         run: |
@@ -46,6 +80,8 @@ jobs:
             sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1 >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "No CHANGELOG entry for $VERSION" >> $GITHUB_STEP_SUMMARY
           else
             # Alpha (develop/feature): list recent commits
+            echo "**Version: ${{ steps.version.outputs.version }}-alpha**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Recent commits:**" >> $GITHUB_STEP_SUMMARY
             git log --oneline -15 --no-merges --pretty=format:"- %s" >> $GITHUB_STEP_SUMMARY
           fi
