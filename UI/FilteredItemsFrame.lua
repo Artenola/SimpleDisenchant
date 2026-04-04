@@ -158,7 +158,7 @@ function FilteredItemsFrame:Create()
             btn:SetScript("OnClick", function(self, button)
                 if InCombatLockdown() then return end
                 if button == "LeftButton" then
-                    -- Insert item at position 1 of disenchant list
+                    -- Insert item at position 1 of disenchant list (without re-scanning)
                     local mainList = addon.ItemList:GetList()
                     table.insert(mainList, 1, {
                         bag = self.itemBag,
@@ -171,9 +171,7 @@ function FilteredItemsFrame:Create()
                         itemLevel = elementData.itemLevel,
                         sellPrice = elementData.sellPrice,
                     })
-                    addon.ItemList:UpdateDisenchantButton()
-                    -- Re-scan to rebuild both lists
-                    addon.ItemList:ScanBags()
+                    addon.ItemList:RefreshDisplay()
                 end
             end)
         end
