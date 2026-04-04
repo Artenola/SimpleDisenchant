@@ -279,10 +279,13 @@ function ItemList:CreateScrollList(parent)
                     ItemList:ScanBags()
                 end
             else
-                -- Re-scan to rebuild clean list, then move selected item to position 1
+                local clickedBag = self.itemBag
+                local clickedSlot = self.itemSlot
+                -- Re-scan to rebuild clean list (clears any forced filtered items)
                 ItemList:ScanBags()
+                -- Move clicked item to position 1
                 for i, item in ipairs(disenchantList) do
-                    if item.bag == self.itemBag and item.slot == self.itemSlot then
+                    if item.bag == clickedBag and item.slot == clickedSlot then
                         table.remove(disenchantList, i)
                         table.insert(disenchantList, 1, item)
                         break
