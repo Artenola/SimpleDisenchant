@@ -158,18 +158,10 @@ function FilteredItemsFrame:Create()
             btn:SetScript("OnClick", function(self, button)
                 if InCombatLockdown() then return end
                 if button == "LeftButton" then
+                    -- Re-scan to get a clean list (removes any previously forced item)
+                    addon.ItemList:ScanBags()
+                    -- Now insert the clicked item at position 1
                     local mainList = addon.ItemList:GetList()
-                    -- Check if item is already in the list (avoid duplicates)
-                    for i, item in ipairs(mainList) do
-                        if item.bag == self.itemBag and item.slot == self.itemSlot then
-                            -- Already in list, just move to position 1
-                            table.remove(mainList, i)
-                            table.insert(mainList, 1, item)
-                            addon.ItemList:RefreshDisplay()
-                            return
-                        end
-                    end
-                    -- Insert item at position 1 of disenchant list
                     table.insert(mainList, 1, {
                         bag = self.itemBag,
                         slot = self.itemSlot,
