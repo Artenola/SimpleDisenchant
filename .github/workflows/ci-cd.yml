@@ -4,65 +4,95 @@ on:
   push:
     branches:
       - develop
+      - main
       - 'feature/**'
     tags:
       - 'v*'
-  release:
-    types: [published]
 
 jobs:
   package:
     name: Package & Publish
     runs-on: ubuntu-latest
+    # Skip redundant run when tag and branch push fire together
     if: >
-      github.event_name == 'release' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-      github.ref == 'refs/heads/develop' ||
-      startsWith(github.ref, 'refs/heads/feature/')
+      !(github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') &&
+        contains(github.event.head_commit.message, 'chore: bump version'))
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check CHANGELOG (release only)
-        if: github.event_name == 'release'
-        run: |
-          TAG="${{ github.event.release.tag_name }}"
-          VERSION="${TAG#v}"
-          if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            echo "::error::CHANGELOG.md ne contient pas d'entrée pour la version $VERSION"
-            exit 1
-          fi
-          echo "CHANGELOG OK pour $VERSION"
-
-      - name: Compute and set next version
-        if: github.event_name != 'release'
+      - name: Compute version
+        id: version
         run: |
           LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          echo "Latest tag: ${LATEST_TAG:-none}"
+
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            # ── Release ──
             VERSION="${GITHUB_REF#refs/tags/v}"
-            # Strip beta/alpha suffix for TOC
-            VERSION="${VERSION%%-*}"
-          elif [[ -n "$LATEST_TAG" ]]; then
+            echo "type=release" >> $GITHUB_OUTPUT
+
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # ── Beta: last tag patch+1, append -beta+short_sha ──
+            BASE="${LATEST_TAG#v}"
+            MAJOR=$(echo "$BASE" | cut -d. -f1)
+            MINOR=$(echo "$BASE" | cut -d. -f2)
+            PATCH=$(echo "$BASE" | cut -d. -f3)
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))-beta+${SHORT_SHA}"
+            echo "type=beta" >> $GITHUB_OUTPUT
+
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            # ── Alpha: last tag minor+1 ──
             BASE="${LATEST_TAG#v}"
             MAJOR=$(echo "$BASE" | cut -d. -f1)
             MINOR=$(echo "$BASE" | cut -d. -f2)
             VERSION="${MAJOR}.$((MINOR + 1)).0"
+            echo "type=alpha" >> $GITHUB_OUTPUT
+
           else
-            VERSION="0.1.0"
+            # ── Feature: same as alpha, dry-run ──
+            BASE="${LATEST_TAG#v}"
+            MAJOR=$(echo "$BASE" | cut -d. -f1)
+            MINOR=$(echo "$BASE" | cut -d. -f2)
+            VERSION="${MAJOR}.$((MINOR + 1)).0"
+            echo "type=dry-run" >> $GITHUB_OUTPUT
           fi
-          echo "Setting TOC version to $VERSION"
-          sed -i "s/^## Version: .*/## Version: $VERSION/" SimpleDisenchant.toc
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Computed version: $VERSION"
+
+      - name: Set TOC version
+        run: |
+          sed -i "s/^## Version: .*/## Version: ${{ steps.version.outputs.version }}/" SimpleDisenchant.toc
+          grep "## Version" SimpleDisenchant.toc
+
+      - name: Create beta tag for packager
+        if: steps.version.outputs.type == 'beta'
+        run: |
+          git tag "v${{ steps.version.outputs.version }}"
+
+      - name: Check CHANGELOG (release only)
+        if: steps.version.outputs.type == 'release'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md does not contain an entry for version $VERSION"
+            exit 1
+          fi
 
       - name: Generate changelog summary
-        if: github.event_name != 'release'
         run: |
-          echo "## Changes in this build" >> $GITHUB_STEP_SUMMARY
+          echo "## ${{ steps.version.outputs.version }} (${{ steps.version.outputs.type }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/v}"
-            VERSION="${VERSION%%-*}"
-            sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1 >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "No CHANGELOG entry for $VERSION" >> $GITHUB_STEP_SUMMARY
+          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${VERSION%%-*}"
+          if grep -q "## \[$VERSION\]" CHANGELOG.md; then
+            sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1 >> $GITHUB_STEP_SUMMARY 2>/dev/null
           else
             echo "**Recent commits:**" >> $GITHUB_STEP_SUMMARY
             git log --oneline -15 --no-merges --pretty=format:"- %s" >> $GITHUB_STEP_SUMMARY
@@ -72,25 +102,11 @@ jobs:
       - name: Set package args
         id: pkg
         run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "args=" >> $GITHUB_OUTPUT
-            echo "publish=true" >> $GITHUB_OUTPUT
-
-          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            # Tag push = beta (packager auto-detects tagged HEAD as release,
-            # but beta tags like v1.6.0-beta1 produce beta type)
-            echo "args=" >> $GITHUB_OUTPUT
-            echo "publish=true" >> $GITHUB_OUTPUT
-
-          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            # Develop = alpha (untagged = alpha automatically)
-            echo "args=" >> $GITHUB_OUTPUT
-            echo "publish=true" >> $GITHUB_OUTPUT
-
-          else
-            # feature/** : -d = skip upload (dry-run)
+          TYPE="${{ steps.version.outputs.type }}"
+          if [[ "$TYPE" == "dry-run" ]]; then
             echo "args=-d" >> $GITHUB_OUTPUT
-            echo "publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "args=" >> $GITHUB_OUTPUT
           fi
 
       - name: Package & Publish
@@ -98,6 +114,42 @@ jobs:
         with:
           args: ${{ steps.pkg.outputs.args }}
         env:
-          CF_API_KEY: ${{ steps.pkg.outputs.publish == 'true' && secrets.CF_API_KEY || '' }}
-          WAGO_API_TOKEN: ${{ steps.pkg.outputs.publish == 'true' && secrets.WAGO_API_TOKEN || '' }}
+          CF_API_KEY: ${{ steps.version.outputs.type != 'dry-run' && secrets.CF_API_KEY || '' }}
+          WAGO_API_TOKEN: ${{ steps.version.outputs.type != 'dry-run' && secrets.WAGO_API_TOKEN || '' }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.type == 'release'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Extract changelog section for this version
+          BODY=$(sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1)
+          gh release create "v$VERSION" --title "v$VERSION" --notes "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update develop after release
+        if: steps.version.outputs.type == 'release'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          NEXT_VERSION="${MAJOR}.$((MINOR + 1)).0"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout develop
+          git pull origin develop
+
+          # Bump TOC version
+          sed -i "s/^## Version: .*/## Version: $NEXT_VERSION/" SimpleDisenchant.toc
+
+          # Add [Unreleased] section to CHANGELOG
+          sed -i "/^## \[$VERSION\]/i ## [Unreleased]\n\n### Added\n\n### Fixed\n" CHANGELOG.md
+
+          git add SimpleDisenchant.toc CHANGELOG.md
+          git commit -m "chore: bump version to $NEXT_VERSION after $VERSION release"
+          git push origin develop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
