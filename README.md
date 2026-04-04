@@ -6,14 +6,17 @@ A World of Warcraft addon that makes disenchanting items from your bags quick an
 
 - **Easy disenchanting**: Display all disenchantable items (weapons and armor) in a clean interface
 - **One-click action**: Select an item and disenchant it with a single button click
-- **Smart filters**: Filter items by rarity, item level range, and vendor price range using WoW's native dropdown menu
+- **Smart filters**: Filter items by rarity, item level range, vendor price range, binding type (BoE/BoP), and item type (Armor/Weapon/Profession) using WoW's native dropdown menu
+- **Equipment Set protection**: Items in equipment sets are hidden by default to prevent accidental disenchanting (auto-updates when sets change)
+- **Profession Equipment**: Profession equipment (tools, accessories) is recognized and can be disenchanted
 - **Search**: Instantly find items by name with the built-in search box
-- **Filtered items panel**: View items excluded by filters and click to disenchant them anyway
+- **Filtered items panel**: View items excluded by filters (ilvl, gold, equipment sets) and click to disenchant them anyway
 - **Item details**: Each item row shows item level and vendor price with aligned gold/silver/copper columns
 - **Item selection**: Click any item in the list to set it as the next to disenchant
 - **Blacklist system**: Right-click items to blacklist them (they won't appear in the list anymore)
 - **Blacklist management**: View and manage your blacklist with `/sde blacklist` or right-click on the profession button
 - **Profession integration**: Button in Enchanting profession UI (Recipes tab) to quickly open SimpleDisenchant
+- **LibDataBroker support**: Display addon integration for Bazooka, Titan Panel, ChocolateBar, etc.
 - **Minimap button**: Draggable button on the minimap edge — left-click to toggle, right-click for blacklist, shift-click to hide
 - **Addon Compartment**: Same controls as minimap button, with tooltip instructions
 - **Keybinding support**: Assign keyboard shortcuts via WoW's Key Bindings UI (disenchant, toggle window, toggle blacklist, toggle all windows)
@@ -36,12 +39,18 @@ Type `/sde` to open/close the SimpleDisenchant window.
 ### Filters
 Click the **Filter** button next to the search box to open the filter dropdown:
 - **Rarity**: Check/uncheck Uncommon, Rare, or Epic to show/hide items by quality
+- **Binding Type**: Filter by Bind on Equip (BoE) or Bind on Pickup (BoP)
 - **Item Level**: Set a min and/or max item level range
 - **Vendor Price**: Set a min and/or max vendor price in gold
+- **Equipment Sets**: Hide items belonging to equipment sets (enabled by default)
+- **Item Type**: Show/hide Armor, Weapons, or Profession Equipment
 - Hover over section titles for tooltips explaining each filter
 - Use the **reset button** (appears when filters are active) to restore defaults
 
-Items excluded by item level or vendor price filters appear in a separate **Filtered Items** panel. Click any filtered item to disenchant it anyway.
+Items excluded by filters appear in a separate **Filtered Items** panel (grouped by reason). Click any filtered item to disenchant it anyway.
+
+### Reset Window Positions
+Type `/sde reset` to re-dock all windows (main, blacklist, filtered items) to their default positions.
 
 ### Blacklist
 - **Right-click** on any item in the list to add it to the blacklist

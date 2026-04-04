@@ -1,6 +1,6 @@
 # SimpleDisenchant - Plan de Test
 
-Plan de test pour les features des PRs #33, #34, #35, #37.
+Plan de test pour les features des PRs #33, #34, #35, #37, #39.
 
 ---
 
@@ -98,6 +98,29 @@ Plan de test pour les features des PRs #33, #34, #35, #37.
 ### Locales
 - [ ] **T37-L1** : Message de reset en anglais correct
 - [ ] **T37-L2** : Message de reset en francais correct
+
+---
+
+## PR #39 - Binding Type Filter (Issue #38)
+
+### Pre-requis
+- Avoir des items BoE (Bind on Equip) et BoP (Bind on Pickup) desenchantables dans les sacs
+
+### Tests
+
+- [ ] **T39-01** : Ouvrir `/sde`, verifier que les items BoE et BoP apparaissent (filtres actifs par defaut)
+- [ ] **T39-02** : Ouvrir le dropdown "Filtre", verifier la section "Binding Type" avec 2 checkboxes : BoE et BoP
+- [ ] **T39-03** : Decocher "Bind on Equip", verifier que les items BoE disparaissent de la liste
+- [ ] **T39-04** : Decocher "Bind on Pickup", verifier que les items BoP disparaissent de la liste
+- [ ] **T39-05** : Recocher chaque type — les items reapparaissent
+- [ ] **T39-06** : Le bouton "Reset" remet les deux types a coches
+- [ ] **T39-07** : `/reload` — les reglages de binding type sont persistes
+- [ ] **T39-08** : Verifier que `HasActiveFilters()` detecte un binding type decocher (indicateur visuel sur le bouton Filtre)
+
+### Locales
+- [ ] **T39-L1** : Labels en anglais corrects (Bind on Equip, Bind on Pickup)
+- [ ] **T39-L2** : Labels en francais corrects
+- [ ] **T39-L3** : Tooltip du filtre binding type visible et correct
 
 ---
 

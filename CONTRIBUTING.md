@@ -42,15 +42,17 @@ Open an issue with the `enhancement` label describing:
 
 ### Translations
 
-To add or improve translations, edit the `L` table in `SimpleDisenchant.lua`:
+Translation files are in the `Locales/` folder. To add or improve translations, edit the corresponding locale file (e.g., `Locales/frFR.lua`):
 
 ```lua
-L["xxXX"] = {
+addon.L["xxXX"] = {
     TITLE = "...",
     DISENCHANT = "...",
     -- etc.
 }
 ```
+
+The default English strings are in `Locales/Locales.lua`.
 
 ## Questions?
 
