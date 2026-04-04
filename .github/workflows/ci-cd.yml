@@ -34,12 +34,17 @@ jobs:
 
   package:
     name: Package & Publish
+    needs: sonarqube
     runs-on: ubuntu-latest
     if: >
-      github.event_name == 'release' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-      github.ref == 'refs/heads/develop' ||
-      startsWith(github.ref, 'refs/heads/feature/')
+      always() &&
+      (needs.sonarqube.result == 'success' || needs.sonarqube.result == 'skipped') &&
+      (
+        github.event_name == 'release' ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+        github.ref == 'refs/heads/develop' ||
+        startsWith(github.ref, 'refs/heads/feature/')
+      )
     steps:
       - uses: actions/checkout@v4
         with:
