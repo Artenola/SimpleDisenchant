@@ -74,16 +74,16 @@ jobs:
             echo "publish=true" >> $GITHUB_OUTPUT
 
           elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "args=-n {package-name}-{project-version}{beta}{nolib}{classic}:{project-version}{beta}{classic}{nolib}" >> $GITHUB_OUTPUT
+            echo "args=-r beta" >> $GITHUB_OUTPUT
             echo "publish=true" >> $GITHUB_OUTPUT
 
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "args=-n {package-name}-{project-version}{alpha}{nolib}{classic}:{project-version}{alpha}{classic}{nolib}" >> $GITHUB_OUTPUT
+            echo "args=-r alpha" >> $GITHUB_OUTPUT
             echo "publish=true" >> $GITHUB_OUTPUT
 
           else
             # feature/** : -d = skip upload (dry-run packager)
-            echo "args=-d -n {package-name}-{project-version}{alpha}{nolib}{classic}:{project-version}{alpha}{classic}{nolib}" >> $GITHUB_OUTPUT
+            echo "args=-d -r alpha" >> $GITHUB_OUTPUT
             echo "publish=false" >> $GITHUB_OUTPUT
           fi
 
