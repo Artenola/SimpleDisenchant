@@ -2,6 +2,30 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Binding Type filter** (Issue #38): Filter items by Bind on Equip (BoE) or Bind on Pickup (BoP)
+- **Equipment Set filter** (Issue #32): Hide items belonging to equipment sets to prevent accidental disenchanting
+  - Auto-rescan when equipment sets are modified (`EQUIPMENT_SETS_CHANGED` event)
+  - Filtered equipment set items shown in the Filtered Items panel with dedicated section
+- **Profession Equipment support** (Issue #31): Profession equipment (classID 19) now appears in the disenchant list
+  - Item Type filter: filter by Armor, Weapon, or Profession Equipment
+- **LibDataBroker launcher** (Issue #30): Display addon support for Bazooka, Titan Panel, ChocolateBar, etc.
+  - Left-click: toggle main window
+  - Right-click: toggle blacklist
+  - Shift-click: toggle minimap button
+  - Graceful fallback if LibDataBroker is not available
+- **Reset window positions** (Issue #36): `/sde reset` command to re-dock all windows to their default positions
+- **CI/CD overhaul**: Unified workflow with SonarCloud analysis, conditional packaging (dry-run on features, alpha on develop, beta on tags, release on GitHub release), and changelog summary in build output
+- **Local dev tooling**: `install-libs.ps1` script for downloading library dependencies
+
+### Fixed
+- Window overlap: Blacklist and Filtered Items frames now dock correctly instead of stacking
+- Clicking a filtered item now correctly sets it as next to disenchant
+- Fixed wrong item selection when clicking in the main list (stale ScrollBox button refs)
+- Replaced deprecated `EquipmentManager_UnpackLocation` with `EquipmentManager_GetLocationData` (WoW 11.2.0+)
+
 ## [1.5.0] - 2026-03-06
 
 ### Added
