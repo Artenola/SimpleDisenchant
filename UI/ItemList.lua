@@ -342,10 +342,10 @@ function ItemList:ScanBags()
             local locations = C_EquipmentSet.GetItemLocations(setID)
             for _, location in pairs(locations) do
                 if location and location > 0 then
-                    local _, _, bags, _, slot, bag = EquipmentManager_UnpackLocation(location)
-                    if bags and bag and slot then
-                        equipSetLookup[bag] = equipSetLookup[bag] or {}
-                        equipSetLookup[bag][slot] = name
+                    local locData = EquipmentManager_GetLocationData(location)
+                    if locData and locData.isBags and locData.bag and locData.slot then
+                        equipSetLookup[locData.bag] = equipSetLookup[locData.bag] or {}
+                        equipSetLookup[locData.bag][locData.slot] = name
                     end
                 end
             end
