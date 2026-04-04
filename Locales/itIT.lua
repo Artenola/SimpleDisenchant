@@ -52,6 +52,12 @@ addon.L["itIT"] = {
     FILTER_ILVL_TOOLTIP = "Imposta livello oggetto min/max. Vuoto = nessun limite.",
     FILTER_GOLD_TOOLTIP = "Imposta prezzo venditore min/max in oro. Vuoto = nessun limite.",
 
+    -- Binding type filter
+    FILTER_BINDING_TYPE = "Tipo di legame",
+    FILTER_BINDING_TYPE_TOOLTIP = "Includi o escludi oggetti per tipo di legame",
+    FILTER_BINDING_BOE = "Legato all'equipaggiamento",
+    FILTER_BINDING_BOP = "Legato al ritiro",
+
     -- Reset positions
     RESET_POSITIONS_MSG = "Tutte le posizioni delle finestre sono state reimpostate.",
     -- Equipment set filter

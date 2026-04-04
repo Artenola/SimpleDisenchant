@@ -48,6 +48,9 @@ C.DEFAULT_FILTERS = {
     ilvlMax = nil,
     goldMin = nil,
     goldMax = nil,
+    bindingType = { boe = true, bop = true },
+    hideEquipmentSets = true,
+    itemTypes = { armor = true, weapon = true, profession = true },
 }
 
 -- Binding types (from C_Item.GetItemInfo return #14)
