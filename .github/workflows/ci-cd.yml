@@ -92,6 +92,13 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
+      - name: Create temporary tag for packager type detection
+        if: steps.version.outputs.type != 'release'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git tag "v${VERSION}"
+          echo "Created temp tag v${VERSION} for packager detection"
+
       - name: Set package args
         id: pkg
         run: |
@@ -100,11 +107,9 @@ jobs:
 
           LABEL="v${VERSION}"
           if [[ "$TYPE" == "dry-run" ]]; then
-            echo "args=-d -r alpha -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
-          elif [[ "$TYPE" == "release" ]]; then
-            echo "args=-n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
+            echo "args=-d -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
           else
-            echo "args=-r ${TYPE} -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
+            echo "args=-n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
           fi
 
       - name: Package & Publish
