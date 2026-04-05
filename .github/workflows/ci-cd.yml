@@ -10,13 +10,44 @@ on:
       - 'v*'
 
 jobs:
+  # ──────────────────────────────────────────────
+  # Main push: create a beta tag (packaging is handled by the tag job below)
+  # ──────────────────────────────────────────────
+  create-beta-tag:
+    name: Create Beta Tag
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create beta tag
+        run: |
+          # Read version from TOC
+          VERSION=$(grep -oP '## Version: \K.*' SimpleDisenchant.toc)
+          echo "TOC version: $VERSION"
+
+          # Count existing beta tags for this version
+          BETA_COUNT=$(git tag --list "v${VERSION}-beta*" | wc -l)
+          BETA_NUM=$((BETA_COUNT + 1))
+          TAG="v${VERSION}-beta${BETA_NUM}"
+
+          echo "Creating tag: $TAG"
+          git tag "$TAG"
+          git push origin "$TAG"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────
+  # Package: runs on develop, feature, and tag pushes (NOT main)
+  # ──────────────────────────────────────────────
   package:
     name: Package & Publish
     runs-on: ubuntu-latest
-    # Skip redundant run when tag and branch push fire together
-    if: >
-      !(github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') &&
-        contains(github.event.head_commit.message, 'chore: bump version'))
+    if: github.ref != 'refs/heads/main'
     permissions:
       contents: write
     steps:
@@ -25,73 +56,58 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute version
-        id: version
+      - name: Compute version and type
+        id: info
         run: |
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
-          echo "Latest tag: ${LATEST_TAG:-none}"
+          # Read version from TOC
+          TOC_VERSION=$(grep -oP '## Version: \K.*' SimpleDisenchant.toc)
+          echo "TOC version: $TOC_VERSION"
 
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          if [[ "${{ github.ref }}" == refs/tags/v*-beta* ]]; then
+            # ── Beta tag ──
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            echo "type=beta" >> $GITHUB_OUTPUT
+
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            # ── Release tag ──
             VERSION="${GITHUB_REF#refs/tags/v}"
             echo "type=release" >> $GITHUB_OUTPUT
 
-          elif [[ -n "$LATEST_TAG" ]]; then
-            BASE="${LATEST_TAG#v}"
-            MAJOR=$(echo "$BASE" | cut -d. -f1)
-            MINOR=$(echo "$BASE" | cut -d. -f2)
-            PATCH=$(echo "$BASE" | cut -d. -f3)
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            # ── Alpha ──
             SHORT_SHA=$(git rev-parse --short HEAD)
-            NEXT_PATCH="${MAJOR}.${MINOR}.$((PATCH + 1))"
-
-            if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              # Count existing beta tags for this version to auto-increment
-              BETA_COUNT=$(git tag --list "v${NEXT_PATCH}-beta*" | wc -l)
-              BETA_NUM=$((BETA_COUNT + 1))
-              VERSION="${NEXT_PATCH}-beta${BETA_NUM}"
-              echo "type=beta" >> $GITHUB_OUTPUT
-            elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-              VERSION="${NEXT_PATCH}-alpha+${SHORT_SHA}"
-              echo "type=alpha" >> $GITHUB_OUTPUT
-            else
-              VERSION="${NEXT_PATCH}-alpha+${SHORT_SHA}"
-              echo "type=dry-run" >> $GITHUB_OUTPUT
-            fi
+            VERSION="${TOC_VERSION}-alpha+${SHORT_SHA}"
+            echo "type=alpha" >> $GITHUB_OUTPUT
 
           else
-            VERSION="0.1.0"
-            echo "type=alpha" >> $GITHUB_OUTPUT
+            # ── Feature: dry-run ──
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${TOC_VERSION}-alpha+${SHORT_SHA}"
+            echo "type=dry-run" >> $GITHUB_OUTPUT
           fi
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Computed version: $VERSION"
+          echo "Version: $VERSION"
 
       - name: Set TOC version
+        if: steps.info.outputs.type != 'release'
         run: |
-          sed -i "s/^## Version: .*/## Version: ${{ steps.version.outputs.version }}/" SimpleDisenchant.toc
-          grep "## Version" SimpleDisenchant.toc
+          sed -i "s/^## Version: .*/## Version: ${{ steps.info.outputs.version }}/" SimpleDisenchant.toc
 
-      - name: Create beta tag
-        if: steps.version.outputs.type == 'beta'
+      - name: Check CHANGELOG
+        if: steps.info.outputs.type == 'release'
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          git tag "v${VERSION}"
-          git push origin "v${VERSION}"
-          echo "Created and pushed tag v${VERSION}"
-
-      - name: Check CHANGELOG (release only)
-        if: steps.version.outputs.type == 'release'
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${{ steps.info.outputs.version }}"
           if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
             echo "::error::CHANGELOG.md does not contain an entry for version $VERSION"
             exit 1
           fi
 
-      - name: Generate changelog summary
+      - name: Generate summary
         run: |
-          echo "## ${{ steps.version.outputs.version }} (${{ steps.version.outputs.type }})" >> $GITHUB_STEP_SUMMARY
+          echo "## ${{ steps.info.outputs.version }} (${{ steps.info.outputs.type }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${{ steps.info.outputs.version }}"
           VERSION="${VERSION%%-*}"
           if grep -q "## \[$VERSION\]" CHANGELOG.md; then
             sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1 >> $GITHUB_STEP_SUMMARY 2>/dev/null
@@ -99,13 +115,12 @@ jobs:
             echo "**Recent commits:**" >> $GITHUB_STEP_SUMMARY
             git log --oneline -15 --no-merges --pretty=format:"- %s" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Set package args
         id: pkg
         run: |
-          TYPE="${{ steps.version.outputs.type }}"
-          VERSION="${{ steps.version.outputs.version }}"
+          TYPE="${{ steps.info.outputs.type }}"
+          VERSION="${{ steps.info.outputs.version }}"
           LABEL="v${VERSION}"
 
           if [[ "$TYPE" == "dry-run" ]]; then
@@ -119,26 +134,26 @@ jobs:
         with:
           args: ${{ steps.pkg.outputs.args }}
         env:
-          CF_API_KEY: ${{ steps.version.outputs.type != 'dry-run' && secrets.CF_API_KEY || '' }}
-          WAGO_API_TOKEN: ${{ steps.version.outputs.type != 'dry-run' && secrets.WAGO_API_TOKEN || '' }}
+          CF_API_KEY: ${{ steps.info.outputs.type != 'dry-run' && secrets.CF_API_KEY || '' }}
+          WAGO_API_TOKEN: ${{ steps.info.outputs.type != 'dry-run' && secrets.WAGO_API_TOKEN || '' }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
-        if: steps.version.outputs.type == 'release'
+        if: steps.info.outputs.type == 'release'
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${{ steps.info.outputs.version }}"
           BODY=$(sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1)
           gh release create "v$VERSION" --title "v$VERSION" --notes "$BODY"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update develop after release
-        if: steps.version.outputs.type == 'release'
+        if: steps.info.outputs.type == 'release'
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${{ steps.info.outputs.version }}"
           MAJOR=$(echo "$VERSION" | cut -d. -f1)
           MINOR=$(echo "$VERSION" | cut -d. -f2)
-          NEXT_VERSION="${MAJOR}.$((MINOR + 1)).0"
+          NEXT="${MAJOR}.$((MINOR + 1)).0"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -146,11 +161,11 @@ jobs:
           git checkout develop
           git pull origin develop
 
-          sed -i "s/^## Version: .*/## Version: $NEXT_VERSION/" SimpleDisenchant.toc
+          sed -i "s/^## Version: .*/## Version: $NEXT/" SimpleDisenchant.toc
           sed -i "/^## \[$VERSION\]/i ## [Unreleased]\n\n### Added\n\n### Fixed\n" CHANGELOG.md
 
           git add SimpleDisenchant.toc CHANGELOG.md
-          git commit -m "chore: bump version to $NEXT_VERSION after $VERSION release"
+          git commit -m "chore: bump version to $NEXT after $VERSION release"
           git push origin develop
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
