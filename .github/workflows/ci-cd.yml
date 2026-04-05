@@ -32,12 +32,10 @@ jobs:
           echo "Latest tag: ${LATEST_TAG:-none}"
 
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            # ── Release: version from tag ──
             VERSION="${GITHUB_REF#refs/tags/v}"
             echo "type=release" >> $GITHUB_OUTPUT
 
           elif [[ -n "$LATEST_TAG" ]]; then
-            # ── Alpha/Beta: last tag patch+1 ──
             BASE="${LATEST_TAG#v}"
             MAJOR=$(echo "$BASE" | cut -d. -f1)
             MINOR=$(echo "$BASE" | cut -d. -f2)
@@ -97,12 +95,20 @@ jobs:
         run: |
           TYPE="${{ steps.version.outputs.type }}"
           VERSION="${{ steps.version.outputs.version }}"
-
           LABEL="v${VERSION}"
-          if [[ "$TYPE" == "dry-run" ]]; then
-            echo "args=-d -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
-          else
+
+          if [[ "$TYPE" == "release" ]]; then
+            # Release: no {alpha}/{beta} tokens, packager detects from tag
             echo "args=-n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
+          elif [[ "$TYPE" == "beta" ]]; then
+            # Beta: {beta} token forces CurseForge type to beta
+            echo "args=-n SimpleDisenchant-${VERSION}{beta}:${LABEL}{beta}" >> $GITHUB_OUTPUT
+          elif [[ "$TYPE" == "dry-run" ]]; then
+            # Feature: dry-run, no upload
+            echo "args=-d -n SimpleDisenchant-${VERSION}{alpha}:${LABEL}{alpha}" >> $GITHUB_OUTPUT
+          else
+            # Alpha: {alpha} token (redundant but explicit)
+            echo "args=-n SimpleDisenchant-${VERSION}{alpha}:${LABEL}{alpha}" >> $GITHUB_OUTPUT
           fi
 
       - name: Package & Publish
@@ -118,7 +124,6 @@ jobs:
         if: steps.version.outputs.type == 'release'
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # Extract changelog section for this version
           BODY=$(sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1)
           gh release create "v$VERSION" --title "v$VERSION" --notes "$BODY"
         env:
@@ -138,10 +143,7 @@ jobs:
           git checkout develop
           git pull origin develop
 
-          # Bump TOC version
           sed -i "s/^## Version: .*/## Version: $NEXT_VERSION/" SimpleDisenchant.toc
-
-          # Add [Unreleased] section to CHANGELOG
           sed -i "/^## \[$VERSION\]/i ## [Unreleased]\n\n### Added\n\n### Fixed\n" CHANGELOG.md
 
           git add SimpleDisenchant.toc CHANGELOG.md
