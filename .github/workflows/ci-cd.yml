@@ -44,7 +44,10 @@ jobs:
             NEXT_PATCH="${MAJOR}.${MINOR}.$((PATCH + 1))"
 
             if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              VERSION="${NEXT_PATCH}-beta+${SHORT_SHA}"
+              # Count existing beta tags for this version to auto-increment
+              BETA_COUNT=$(git tag --list "v${NEXT_PATCH}-beta*" | wc -l)
+              BETA_NUM=$((BETA_COUNT + 1))
+              VERSION="${NEXT_PATCH}-beta${BETA_NUM}"
               echo "type=beta" >> $GITHUB_OUTPUT
             elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
               VERSION="${NEXT_PATCH}-alpha+${SHORT_SHA}"
@@ -66,6 +69,14 @@ jobs:
         run: |
           sed -i "s/^## Version: .*/## Version: ${{ steps.version.outputs.version }}/" SimpleDisenchant.toc
           grep "## Version" SimpleDisenchant.toc
+
+      - name: Create beta tag
+        if: steps.version.outputs.type == 'beta'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+          echo "Created and pushed tag v${VERSION}"
 
       - name: Check CHANGELOG (release only)
         if: steps.version.outputs.type == 'release'
@@ -97,18 +108,10 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           LABEL="v${VERSION}"
 
-          if [[ "$TYPE" == "release" ]]; then
-            # Release: no {alpha}/{beta} tokens, packager detects from tag
-            echo "args=-n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
-          elif [[ "$TYPE" == "beta" ]]; then
-            # Beta: {beta} token forces CurseForge type to beta
-            echo "args=-n SimpleDisenchant-${VERSION}{beta}:${LABEL}{beta}" >> $GITHUB_OUTPUT
-          elif [[ "$TYPE" == "dry-run" ]]; then
-            # Feature: dry-run, no upload
-            echo "args=-d -n SimpleDisenchant-${VERSION}{alpha}:${LABEL}{alpha}" >> $GITHUB_OUTPUT
+          if [[ "$TYPE" == "dry-run" ]]; then
+            echo "args=-d -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
           else
-            # Alpha: {alpha} token (redundant but explicit)
-            echo "args=-n SimpleDisenchant-${VERSION}{alpha}:${LABEL}{alpha}" >> $GITHUB_OUTPUT
+            echo "args=-n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
           fi
 
       - name: Package & Publish
