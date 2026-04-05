@@ -69,11 +69,6 @@ jobs:
           sed -i "s/^## Version: .*/## Version: ${{ steps.version.outputs.version }}/" SimpleDisenchant.toc
           grep "## Version" SimpleDisenchant.toc
 
-      - name: Create beta tag for packager
-        if: steps.version.outputs.type == 'beta'
-        run: |
-          git tag "v${{ steps.version.outputs.version }}"
-
       - name: Check CHANGELOG (release only)
         if: steps.version.outputs.type == 'release'
         run: |
@@ -105,9 +100,11 @@ jobs:
 
           LABEL="v${VERSION}"
           if [[ "$TYPE" == "dry-run" ]]; then
-            echo "args=-d -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
-          else
+            echo "args=-d -r alpha -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
+          elif [[ "$TYPE" == "release" ]]; then
             echo "args=-n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
+          else
+            echo "args=-r ${TYPE} -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
           fi
 
       - name: Package & Publish
