@@ -92,13 +92,6 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-      - name: Create temporary tag for packager type detection
-        if: steps.version.outputs.type != 'release'
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          git tag "v${VERSION}"
-          echo "Created temp tag v${VERSION} for packager detection"
-
       - name: Set package args
         id: pkg
         run: |
