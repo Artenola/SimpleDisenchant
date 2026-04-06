@@ -10,44 +10,9 @@ on:
       - 'v*'
 
 jobs:
-  # ──────────────────────────────────────────────
-  # Main push: create a beta tag (packaging is handled by the tag job below)
-  # ──────────────────────────────────────────────
-  create-beta-tag:
-    name: Create Beta Tag
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Create beta tag
-        run: |
-          # Read version from TOC
-          VERSION=$(grep -oP '## Version: \K.*' SimpleDisenchant.toc)
-          echo "TOC version: $VERSION"
-
-          # Count existing beta tags for this version
-          BETA_COUNT=$(git tag --list "v${VERSION}-beta*" | wc -l)
-          BETA_NUM=$((BETA_COUNT + 1))
-          TAG="v${VERSION}-beta${BETA_NUM}"
-
-          echo "Creating tag: $TAG"
-          git tag "$TAG"
-          git push origin "$TAG"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # ──────────────────────────────────────────────
-  # Package: runs on develop, feature, and tag pushes (NOT main)
-  # ──────────────────────────────────────────────
   package:
     name: Package & Publish
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
     permissions:
       contents: write
     steps:
@@ -64,7 +29,7 @@ jobs:
           echo "TOC version: $TOC_VERSION"
 
           if [[ "${{ github.ref }}" == refs/tags/v*-beta* ]]; then
-            # ── Beta tag ──
+            # ── Beta tag (triggered externally) ──
             VERSION="${GITHUB_REF#refs/tags/v}"
             echo "type=beta" >> $GITHUB_OUTPUT
 
@@ -72,6 +37,17 @@ jobs:
             # ── Release tag ──
             VERSION="${GITHUB_REF#refs/tags/v}"
             echo "type=release" >> $GITHUB_OUTPUT
+
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # ── Main branch: create beta tag and package as beta ──
+            BETA_COUNT=$(git tag --list "v${TOC_VERSION}-beta*" | wc -l)
+            BETA_NUM=$((BETA_COUNT + 1))
+            TAG="v${TOC_VERSION}-beta${BETA_NUM}"
+            echo "Creating tag: $TAG"
+            git tag "$TAG"
+            git push origin "$TAG"
+            VERSION="${TOC_VERSION}-beta${BETA_NUM}"
+            echo "type=beta" >> $GITHUB_OUTPUT
 
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
             # ── Alpha ──
