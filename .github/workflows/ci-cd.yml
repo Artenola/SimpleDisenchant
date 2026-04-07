@@ -10,8 +10,8 @@ on:
       - 'v*'
 
 jobs:
-  package:
-    name: Package & Publish
+  build:
+    name: Build & Publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,105 +21,127 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends subversion jq zip rsync
+
+      # ──────────────────────────────────────────────
+      # Compute version and release type from TOC + ref
+      # ──────────────────────────────────────────────
       - name: Compute version and type
         id: info
         run: |
-          # Read version from TOC
           TOC_VERSION=$(grep -oP '## Version: \K.*' SimpleDisenchant.toc)
           echo "TOC version: $TOC_VERSION"
 
-          if [[ "${{ github.ref }}" == refs/tags/v*-beta* ]]; then
-            # ── Beta tag (triggered externally) ──
-            VERSION="${GITHUB_REF#refs/tags/v}"
-            echo "type=beta" >> $GITHUB_OUTPUT
-
-          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            # ── Release tag ──
-            VERSION="${GITHUB_REF#refs/tags/v}"
-            echo "type=release" >> $GITHUB_OUTPUT
-
-          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            # ── Main branch: create beta tag and package as beta ──
-            BETA_COUNT=$(git tag --list "v${TOC_VERSION}-beta*" | wc -l)
-            BETA_NUM=$((BETA_COUNT + 1))
-            TAG="v${TOC_VERSION}-beta${BETA_NUM}"
-            echo "Creating tag: $TAG"
-            git tag "$TAG"
-            git push origin "$TAG"
-            VERSION="${TOC_VERSION}-beta${BETA_NUM}"
-            echo "type=beta" >> $GITHUB_OUTPUT
-
-          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            # ── Alpha ──
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+            if [[ "$TAG_VERSION" != "$TOC_VERSION" ]]; then
+              echo "::error::Tag version ($TAG_VERSION) does not match TOC version ($TOC_VERSION)"
+              exit 1
+            fi
+            VERSION="$TOC_VERSION"
+            TYPE="release"
+          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
             SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="${TOC_VERSION}-alpha+${SHORT_SHA}"
-            echo "type=alpha" >> $GITHUB_OUTPUT
-
+            VERSION="${TOC_VERSION}-beta-${SHORT_SHA}"
+            TYPE="beta"
+          elif [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            VERSION="${TOC_VERSION}-alpha-${SHORT_SHA}"
+            TYPE="alpha"
           else
-            # ── Feature: dry-run ──
             SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="${TOC_VERSION}-alpha+${SHORT_SHA}"
-            echo "type=dry-run" >> $GITHUB_OUTPUT
+            VERSION="${TOC_VERSION}-alpha-${SHORT_SHA}"
+            TYPE="dry-run"
           fi
 
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "type=$TYPE" >> "$GITHUB_OUTPUT"
+          echo ""
+          echo "→ Version: $VERSION"
+          echo "→ Type   : $TYPE"
 
       - name: Set TOC version
         if: steps.info.outputs.type != 'release'
         run: |
           sed -i "s/^## Version: .*/## Version: ${{ steps.info.outputs.version }}/" SimpleDisenchant.toc
 
-      - name: Check CHANGELOG
+      # ──────────────────────────────────────────────
+      # CHANGELOG validation and extraction
+      # ──────────────────────────────────────────────
+      - name: Check CHANGELOG for release
         if: steps.info.outputs.type == 'release'
         run: |
           VERSION="${{ steps.info.outputs.version }}"
           if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            echo "::error::CHANGELOG.md does not contain an entry for version $VERSION"
+            echo "::error::CHANGELOG.md missing entry for $VERSION"
             exit 1
           fi
 
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          VERSION="${{ steps.info.outputs.version }}"
+          BASE_VERSION="${VERSION%%-*}"
+          BODY=""
+          if grep -q "## \[$BASE_VERSION\]" CHANGELOG.md; then
+            BODY=$(sed -n "/^## \[$BASE_VERSION\]/,/^## \[/p" CHANGELOG.md | sed '$d')
+          fi
+          {
+            echo "body<<CHANGELOG_EOF"
+            echo "$BODY"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # ──────────────────────────────────────────────
+      # Build package (zip with externals)
+      # ──────────────────────────────────────────────
+      - name: Build package
+        id: build
+        run: ./scripts/build-package.sh
+        env:
+          VERSION: ${{ steps.info.outputs.version }}
+
+      # ──────────────────────────────────────────────
+      # Upload to CurseForge & Wago (skip dry-run)
+      # ──────────────────────────────────────────────
+      - name: Upload to CurseForge & Wago
+        if: steps.info.outputs.type != 'dry-run'
+        run: ./scripts/upload-package.sh
+        env:
+          ARCHIVE: ${{ steps.build.outputs.archive }}
+          VERSION: ${{ steps.info.outputs.version }}
+          RELEASE_TYPE: ${{ steps.info.outputs.type }}
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+          CHANGELOG_BODY: ${{ steps.changelog.outputs.body }}
+
+      # ──────────────────────────────────────────────
+      # Summary
+      # ──────────────────────────────────────────────
       - name: Generate summary
         run: |
-          echo "## ${{ steps.info.outputs.version }} (${{ steps.info.outputs.type }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          VERSION="${{ steps.info.outputs.version }}"
-          VERSION="${VERSION%%-*}"
-          if grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1 >> $GITHUB_STEP_SUMMARY 2>/dev/null
-          else
-            echo "**Recent commits:**" >> $GITHUB_STEP_SUMMARY
-            git log --oneline -15 --no-merges --pretty=format:"- %s" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## ${{ steps.info.outputs.version }} (${{ steps.info.outputs.type }})"
+            echo ""
+            echo "**Archive:** \`${{ steps.build.outputs.archive_name }}\`"
+            echo ""
+            echo "${{ steps.changelog.outputs.body }}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Set package args
-        id: pkg
-        run: |
-          TYPE="${{ steps.info.outputs.type }}"
-          VERSION="${{ steps.info.outputs.version }}"
-          LABEL="v${VERSION}"
-
-          if [[ "$TYPE" == "dry-run" ]]; then
-            echo "args=-d -n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
-          else
-            echo "args=-n SimpleDisenchant-${VERSION}:${LABEL}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Package & Publish
-        uses: BigWigsMods/packager@v2
-        with:
-          args: ${{ steps.pkg.outputs.args }}
-        env:
-          CF_API_KEY: ${{ steps.info.outputs.type != 'dry-run' && secrets.CF_API_KEY || '' }}
-          WAGO_API_TOKEN: ${{ steps.info.outputs.type != 'dry-run' && secrets.WAGO_API_TOKEN || '' }}
-          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-
+      # ──────────────────────────────────────────────
+      # Release-only steps
+      # ──────────────────────────────────────────────
       - name: Create GitHub Release
         if: steps.info.outputs.type == 'release'
         run: |
           VERSION="${{ steps.info.outputs.version }}"
-          BODY=$(sed -n "/^## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | head -n -1)
-          gh release create "v$VERSION" --title "v$VERSION" --notes "$BODY"
+          gh release create "v$VERSION" \
+            --title "v$VERSION" \
+            --notes "${{ steps.changelog.outputs.body }}" \
+            "${{ steps.build.outputs.archive }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -134,6 +156,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          git fetch origin develop
           git checkout develop
           git pull origin develop
 
