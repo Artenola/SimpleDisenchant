@@ -19,7 +19,7 @@ jobs:
     name: Build & Publish
     runs-on: ubuntu-latest
     # Skip bump commits from release-please on main (a tag will trigger the release)
-    if: github.ref != 'refs/heads/main' || !startsWith(github.event.head_commit.message, 'chore: release')
+    if: "github.ref != 'refs/heads/main' || !startsWith(github.event.head_commit.message, 'chore: release')"
     permissions:
       contents: write
     steps:
