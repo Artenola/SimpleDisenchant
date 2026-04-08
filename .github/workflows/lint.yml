@@ -1,0 +1,28 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+  push:
+    branches:
+      - develop
+      - main
+      - 'feature/**'
+      - 'features/**'
+
+jobs:
+  luacheck:
+    name: Luacheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install luacheck
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends lua-check
+
+      - name: Run luacheck
+        run: luacheck . --no-color -q

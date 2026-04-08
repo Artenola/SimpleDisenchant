@@ -6,13 +6,20 @@ on:
       - develop
       - main
       - 'feature/**'
+      - 'features/**'
     tags:
       - 'v*'
+
+# Skip runs triggered by release-please bump commits (they push to main
+# but we don't want to publish a beta for a pure version-bump commit).
+# The actual release is triggered by the tag created by release-please.
 
 jobs:
   build:
     name: Build & Publish
     runs-on: ubuntu-latest
+    # Skip bump commits from release-please on main (a tag will trigger the release)
+    if: ${{ !(github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'chore: release')) }}
     permissions:
       contents: write
     steps:
@@ -32,7 +39,7 @@ jobs:
       - name: Compute version and type
         id: info
         run: |
-          TOC_VERSION=$(grep -oP '## Version: \K.*' SimpleDisenchant.toc)
+          TOC_VERSION=$(grep -oP '## Version:\s*\K[^\s#]+' SimpleDisenchant.toc)
           echo "TOC version: $TOC_VERSION"
 
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
@@ -64,7 +71,6 @@ jobs:
           echo "→ Type   : $TYPE"
 
       - name: Set TOC version
-        if: steps.info.outputs.type != 'release'
         run: |
           sed -i "s/^## Version: .*/## Version: ${{ steps.info.outputs.version }}/" SimpleDisenchant.toc
 
@@ -134,37 +140,27 @@ jobs:
       # ──────────────────────────────────────────────
       # Release-only steps
       # ──────────────────────────────────────────────
-      - name: Create GitHub Release
+      # release-please already creates the GitHub Release when its PR is
+      # merged; we just attach the zip asset to that existing release.
+      - name: Attach zip to GitHub Release
         if: steps.info.outputs.type == 'release'
         run: |
           VERSION="${{ steps.info.outputs.version }}"
-          gh release create "v$VERSION" \
-            --title "v$VERSION" \
-            --notes "${{ steps.changelog.outputs.body }}" \
-            "${{ steps.build.outputs.archive }}"
+          gh release upload "v$VERSION" "${{ steps.build.outputs.archive }}" --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update develop after release
+      # Sync develop with main so it picks up the release-please bump
+      # commit (TOC version + CHANGELOG update).
+      - name: Sync develop with main after release
         if: steps.info.outputs.type == 'release'
         run: |
-          VERSION="${{ steps.info.outputs.version }}"
-          MAJOR=$(echo "$VERSION" | cut -d. -f1)
-          MINOR=$(echo "$VERSION" | cut -d. -f2)
-          NEXT="${MAJOR}.$((MINOR + 1)).0"
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin develop
+          git fetch origin main develop
           git checkout develop
           git pull origin develop
-
-          sed -i "s/^## Version: .*/## Version: $NEXT/" SimpleDisenchant.toc
-          sed -i "/^## \[$VERSION\]/i ## [Unreleased]\n\n### Added\n\n### Fixed\n" CHANGELOG.md
-
-          git add SimpleDisenchant.toc CHANGELOG.md
-          git commit -m "chore: bump version to $NEXT after $VERSION release"
+          git merge origin/main --no-edit
           git push origin develop
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
