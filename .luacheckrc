@@ -14,7 +14,11 @@ exclude_files = {
 
 ignore = {
     "11./SLASH_.*",     -- slash command globals
+    "111/SimpleDisenchant_.*", -- addon-exposed global functions
     "113",               -- accessing undefined variable (WoW API globals can't be enumerated)
+    "122/SlashCmdList",  -- registering slash commands
+    "231",               -- variable never accessed
+    "581",               -- 'not (x ~= y)' simplification
     "211",               -- unused local variable
     "212",               -- unused argument
     "213",               -- unused loop variable
