@@ -12,9 +12,92 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.rp.outputs.release_created }}
+      tag_name: ${{ steps.rp.outputs.tag_name }}
+      version: ${{ steps.rp.outputs.major }}.${{ steps.rp.outputs.minor }}.${{ steps.rp.outputs.patch }}
+      body: ${{ steps.rp.outputs.body }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: rp
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  # When release-please merges its PR it creates a GitHub Release + tag.
+  # GITHUB_TOKEN events don't trigger other workflows, so we build and
+  # upload right here instead of relying on a tag-triggered ci-cd run.
+  publish-release:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends subversion jq zip rsync
+
+      - name: Set version info
+        id: info
+        run: |
+          VERSION="${{ needs.release-please.outputs.version }}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "type=release" >> "$GITHUB_OUTPUT"
+          echo "→ Version: $VERSION (release)"
+
+      - name: Set TOC version
+        run: |
+          sed -i "s/^## Version: .*/## Version: ${{ steps.info.outputs.version }}/" SimpleDisenchant.toc
+
+      - name: Build package
+        id: build
+        run: ./scripts/build-package.sh
+        env:
+          VERSION: ${{ steps.info.outputs.version }}
+
+      - name: Upload to CurseForge & Wago
+        run: ./scripts/upload-package.sh
+        env:
+          ARCHIVE: ${{ steps.build.outputs.archive }}
+          VERSION: ${{ steps.info.outputs.version }}
+          RELEASE_TYPE: release
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+          CHANGELOG_BODY: ${{ needs.release-please.outputs.body }}
+
+      - name: Attach zip to GitHub Release
+        run: |
+          gh release upload "${{ needs.release-please.outputs.tag_name }}" \
+            "${{ steps.build.outputs.archive }}" --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate summary
+        run: |
+          {
+            echo "## ${{ steps.info.outputs.version }} (release)"
+            echo ""
+            echo "**Archive:** \`${{ steps.build.outputs.archive_name }}\`"
+            echo ""
+            echo "${{ needs.release-please.outputs.body }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Sync develop with main after release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main develop
+          git checkout develop
+          git pull origin develop
+          git merge origin/main --no-edit
+          git push origin develop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
