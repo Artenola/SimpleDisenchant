@@ -1,0 +1,47 @@
+# Auto-label PRs based on changed files
+# https://github.com/actions/labeler
+
+i18n:
+  - changed-files:
+    - any-glob-to-any-file: 'Locales/**'
+
+core:
+  - changed-files:
+    - any-glob-to-any-file: 'Core/**'
+
+ui:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'UI/**'
+      - 'Frames/**'
+      - 'Widgets/**'
+
+filters:
+  - changed-files:
+    - any-glob-to-any-file: 'Filters/**'
+
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**'
+      - 'scripts/**'
+      - '.luacheckrc'
+      - '.gitattributes'
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'LICENSE'
+
+build:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'pkgmeta.yaml'
+      - 'SimpleDisenchant.toc'
+      - 'release-please-config.json'
+      - '.release-please-manifest.json'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: 'Libs/**'
