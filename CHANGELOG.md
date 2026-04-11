@@ -2,6 +2,13 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.7.1](https://github.com/Artenola/SimpleDisenchant/compare/v1.7.0...v1.7.1) (2026-04-11)
+
+
+### Fixed
+
+* move release build into release-please workflow ([b8213c4](https://github.com/Artenola/SimpleDisenchant/commit/b8213c4fa0613c589908685f9ae0bd460a867499))
+
 ## [1.7.0](https://github.com/Artenola/SimpleDisenchant/compare/v1.6.0...v1.7.0) (2026-04-11)
 
 
