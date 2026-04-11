@@ -30,8 +30,45 @@ Open an issue with the `enhancement` label describing:
    ```
 3. Make your changes
 4. Test in-game thoroughly
-5. Commit with clear messages
+5. Commit using [Conventional Commits](#commit-messages) format
 6. Push and open a Pull Request to `develop`
+
+### Commit Messages
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/).
+Commit messages drive automatic version bumps and changelog generation via
+[release-please](https://github.com/googleapis/release-please).
+
+**Format:** `type(scope): description`
+
+| Type        | When to use                                  | Version impact |
+|-------------|----------------------------------------------|----------------|
+| `feat`      | New feature                                  | minor (1.6.0 → 1.7.0) |
+| `fix`       | Bug fix                                      | patch (1.6.0 → 1.6.1) |
+| `perf`      | Performance improvement                      | patch          |
+| `refactor`  | Code change without new feature or bug fix   | patch          |
+| `docs`      | Documentation only                           | none           |
+| `style`     | Formatting, whitespace                       | none           |
+| `test`      | Adding or updating tests                     | none           |
+| `chore`     | Maintenance, dependencies, tooling           | none           |
+| `ci`        | CI/CD changes                                | none           |
+| `build`     | Build system, packaging                      | none           |
+
+**Breaking changes:** add `!` after the type (e.g. `feat!:`) or include
+`BREAKING CHANGE:` in the commit body. This bumps the **major** version.
+
+**Examples:**
+```
+feat(filters): add binding type filter
+fix(ui): resolve window overlap on logout
+perf(scan): cache item info between bag updates
+docs: update installation instructions
+chore(deps): update LibDataBroker
+feat!: redesign settings UI
+```
+
+The scope (in parentheses) is optional but recommended for clarity. Common
+scopes: `ui`, `core`, `filters`, `i18n`, `deps`.
 
 ### Code Style
 
@@ -39,6 +76,7 @@ Open an issue with the `enhancement` label describing:
 - Comment complex logic (in English or French)
 - Follow existing code patterns
 - Test with different locales if modifying translations
+- Run `luacheck .` locally before pushing (the CI will block on errors)
 
 ### Translations
 
