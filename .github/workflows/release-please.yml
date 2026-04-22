@@ -89,16 +89,3 @@ jobs:
             echo ""
             echo "${{ needs.release-please.outputs.body }}"
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Sync develop with main after release
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -- .
-          git fetch origin main develop
-          git checkout develop
-          git pull origin develop
-          git merge origin/main --no-edit
-          git push origin develop
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
