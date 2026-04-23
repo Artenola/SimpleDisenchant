@@ -25,6 +25,11 @@ local countText
 local iconFrame, nextItemIcon, nextItemBorder
 local deButton
 
+-- Click cooldown: timestamp of last click, button stays locked until CLICK_COOLDOWN elapses.
+-- UpdateDisenchantButton() also checks this so BAG_UPDATE can't re-enable prematurely.
+local lastClickTime = 0
+local CLICK_COOLDOWN = 2 -- seconds
+
 -- Callback when item is selected
 local onItemSelected = nil
 
@@ -110,7 +115,6 @@ function ItemList:CreateDisenchantButton(parent)
 
     -- Cooldown overlay: WoW-style spinning animation shown after each click
     -- to give clear visual feedback that the button is on cooldown.
-    local CLICK_COOLDOWN = 2 -- seconds before the button can be clicked again
     local cooldown = CreateFrame("Cooldown", nil, deButton, "CooldownFrameTemplate")
     cooldown:SetAllPoints()
     cooldown:SetDrawEdge(true)
@@ -179,14 +183,14 @@ function ItemList:CreateDisenchantButton(parent)
         end
     end)
 
-    -- After each click: show the cooldown animation and disable the button for
-    -- CLICK_COOLDOWN seconds. This prevents spam-clicking from cancelling the
-    -- Disenchant cursor and accidentally equipping items.
-    -- UpdateDisenchantButton() will re-enable it after the rescan if items remain.
+    -- After each click: record timestamp, show cooldown animation and disable.
+    -- BAG_UPDATE will call UpdateDisenchantButton() when loot/dust lands in bags,
+    -- but that function checks lastClickTime and won't re-enable during the cooldown.
     deButton:HookScript("OnClick", function(self)
         if not InCombatLockdown() then
+            lastClickTime = GetTime()
             self:Disable()
-            self.cooldown:SetCooldown(GetTime(), CLICK_COOLDOWN)
+            self.cooldown:SetCooldown(lastClickTime, CLICK_COOLDOWN)
         end
         C_Timer.After(CLICK_COOLDOWN, function()
             if addon.MainFrame:IsShown() and not InCombatLockdown() then
@@ -351,7 +355,12 @@ function ItemList:UpdateDisenchantButton()
         local macroText = "/cast !" .. L.DISENCHANT_SPELL .. "\n/use " .. firstItem.bag .. " " .. firstItem.slot
         deButton:SetAttribute("macrotext", macroText)
         deButton.text:SetText(L.DISENCHANT)
-        deButton:Enable()
+        -- Don't re-enable during the click cooldown: BAG_UPDATE fires when the
+        -- disenchant shard/dust lands in bags, which would prematurely re-enable
+        -- the button before the cooldown animation finishes.
+        if (GetTime() - lastClickTime) >= CLICK_COOLDOWN then
+            deButton:Enable()
+        end
 
         -- Update icon
         nextItemIcon:SetTexture(firstItem.icon)
