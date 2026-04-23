@@ -147,10 +147,32 @@ function ItemList:CreateDisenchantButton(parent)
     -- Configure as macro
     deButton:SetAttribute("type", "macro")
 
+    -- PreClick: verify the expected item is still at the stored bag/slot before firing
+    -- the macro. If another item landed there (e.g. auto-loot between scan and click),
+    -- abort by clearing the macro and rescan instead of risking equipping a wrong item.
+    deButton:HookScript("PreClick", function(self)
+        if InCombatLockdown() then return end
+        local firstItem = disenchantList[1]
+        if not firstItem then
+            self:SetAttribute("macrotext", "")
+            return
+        end
+        local currentLink = C_Container.GetContainerItemLink(firstItem.bag, firstItem.slot)
+        if currentLink ~= firstItem.link then
+            -- Item at that slot changed since last scan — abort and rescan
+            self:SetAttribute("macrotext", "")
+            C_Timer.After(0, function()
+                if addon.MainFrame:IsShown() and not InCombatLockdown() then
+                    ItemList:ScanBags()
+                end
+            end)
+        end
+    end)
+
     -- Disable immediately after click to prevent double-click equipping the item.
     -- A second click would cancel the Disenchant cast, then /use runs without the
     -- disenchant cursor and equips the item instead of disenchanting it.
-    -- UpdateDisenchantButton() re-enables the button once the rescan confirms the item is gone.
+    -- UpdateDisenchantButton() re-enables it once the rescan confirms the item is gone.
     deButton:HookScript("OnClick", function(self)
         if not InCombatLockdown() then
             self:Disable()
