@@ -25,10 +25,17 @@ local countText
 local iconFrame, nextItemIcon, nextItemBorder
 local deButton
 
--- Click cooldown: timestamp of last click, button stays locked until CLICK_COOLDOWN elapses.
--- UpdateDisenchantButton() also checks this so BAG_UPDATE can't re-enable prematurely.
-local lastClickTime = 0
-local CLICK_COOLDOWN = 2 -- seconds
+-- Disenchant-in-progress tracking.
+-- Set when the button is clicked; cleared when the target item is confirmed gone
+-- from its bag/slot (meaning our disenchant completed) and bags have stabilized.
+-- While active, BAG_UPDATE_DELAYED will NOT re-enable the button (a foreign bag
+-- update such as a loot drop must not interrupt the disenchant flow).
+local disenchantInProgress = false
+local pendingItem = nil       -- item we sent to disenchant {bag, slot, link}
+local stabilizeTimer = nil    -- debounce: wait for bags to settle after our DE
+local safetyTimer = nil       -- fallback: reset flag if DE fails/takes too long
+local STABILIZE_DELAY = 0.5  -- seconds to wait after last BAG_UPDATE_DELAYED
+local SAFETY_TIMEOUT  = 5    -- max seconds to keep the button locked
 
 -- Callback when item is selected
 local onItemSelected = nil
@@ -113,15 +120,6 @@ function ItemList:CreateDisenchantButton(parent)
     htex:SetBlendMode("ADD")
     deButton:SetHighlightTexture(htex)
 
-    -- Cooldown overlay: WoW-style spinning animation shown after each click
-    -- to give clear visual feedback that the button is on cooldown.
-    local cooldown = CreateFrame("Cooldown", nil, deButton, "CooldownFrameTemplate")
-    cooldown:SetAllPoints()
-    cooldown:SetDrawEdge(true)
-    cooldown:SetDrawBling(false)
-    cooldown:SetHideCountdownNumbers(true)
-    deButton.cooldown = cooldown
-
     -- Button text
     deButton.text = deButton:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     deButton.text:SetPoint("CENTER")
@@ -183,18 +181,29 @@ function ItemList:CreateDisenchantButton(parent)
         end
     end)
 
-    -- After each click: record timestamp, show cooldown animation and disable.
-    -- BAG_UPDATE will call UpdateDisenchantButton() when loot/dust lands in bags,
-    -- but that function checks lastClickTime and won't re-enable during the cooldown.
+    -- On click: mark which item we sent to disenchant, disable the button.
+    -- The button will only be re-enabled by OnBagUpdateDelayed() once it confirms
+    -- that specific item has left its bag/slot (i.e. the disenchant succeeded).
     deButton:HookScript("OnClick", function(self)
-        if not InCombatLockdown() then
-            lastClickTime = GetTime()
-            self:Disable()
-            self.cooldown:SetCooldown(lastClickTime, CLICK_COOLDOWN)
-        end
-        C_Timer.After(CLICK_COOLDOWN, function()
-            if addon.MainFrame:IsShown() and not InCombatLockdown() then
-                ItemList:ScanBags()
+        if InCombatLockdown() then return end
+        local firstItem = disenchantList[1]
+        if not firstItem then return end
+
+        disenchantInProgress = true
+        pendingItem = { bag = firstItem.bag, slot = firstItem.slot, link = firstItem.link }
+        self:Disable()
+
+        -- Safety valve: if the item never leaves (spell failed, wrong target, etc.)
+        -- reset after SAFETY_TIMEOUT so the button doesn't stay locked forever.
+        if safetyTimer then safetyTimer:Cancel() end
+        safetyTimer = C_Timer.NewTimer(SAFETY_TIMEOUT, function()
+            safetyTimer = nil
+            if disenchantInProgress then
+                disenchantInProgress = false
+                pendingItem = nil
+                if addon.MainFrame:IsShown() and not InCombatLockdown() then
+                    ItemList:ScanBags()
+                end
             end
         end)
     end)
@@ -355,10 +364,9 @@ function ItemList:UpdateDisenchantButton()
         local macroText = "/cast !" .. L.DISENCHANT_SPELL .. "\n/use " .. firstItem.bag .. " " .. firstItem.slot
         deButton:SetAttribute("macrotext", macroText)
         deButton.text:SetText(L.DISENCHANT)
-        -- Don't re-enable during the click cooldown: BAG_UPDATE fires when the
-        -- disenchant shard/dust lands in bags, which would prematurely re-enable
-        -- the button before the cooldown animation finishes.
-        if (GetTime() - lastClickTime) >= CLICK_COOLDOWN then
+        -- Only re-enable if no disenchant is in flight.
+        -- OnBagUpdateDelayed() is responsible for re-enabling after our DE completes.
+        if not disenchantInProgress then
             deButton:Enable()
         end
 
@@ -535,6 +543,41 @@ function ItemList:Initialize(parent)
     eventFrame:SetScript("OnEvent", function()
         if addon.MainFrame:IsShown() and not InCombatLockdown() then
             self:ScanBags()
+        end
+    end)
+end
+
+-- Called by SimpleDisenchant.lua on BAG_UPDATE_DELAYED.
+-- If a disenchant is in progress: check whether our target item has left its slot.
+--   • Item gone → bags are changing due to our DE → debounce then rescan + re-enable.
+--   • Item still there → DE not done yet, do nothing and wait.
+-- If no disenchant in progress → do nothing (loot or other bag change, we don't care).
+function ItemList:OnBagUpdateDelayed()
+    if not addon.MainFrame:IsShown() or InCombatLockdown() then return end
+
+    if not disenchantInProgress then
+        -- Not our event — ignore completely.
+        return
+    end
+
+    -- Check if the item we sent to disenchant has left its bag/slot.
+    local currentLink = pendingItem and C_Container.GetContainerItemLink(pendingItem.bag, pendingItem.slot)
+    if currentLink == pendingItem.link then
+        -- Item still there, disenchant not yet complete — keep waiting.
+        return
+    end
+
+    -- Item is gone: our disenchant fired. Cancel the safety timer.
+    if safetyTimer then safetyTimer:Cancel() ; safetyTimer = nil end
+
+    -- Debounce: wait for bags to fully stabilize (dust/shard may still be landing).
+    if stabilizeTimer then stabilizeTimer:Cancel() end
+    stabilizeTimer = C_Timer.NewTimer(STABILIZE_DELAY, function()
+        stabilizeTimer = nil
+        disenchantInProgress = false
+        pendingItem = nil
+        if addon.MainFrame:IsShown() and not InCombatLockdown() then
+            ItemList:ScanBags()
         end
     end)
 end

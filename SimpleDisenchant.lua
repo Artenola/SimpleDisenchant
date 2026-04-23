@@ -67,9 +67,7 @@ local function Initialize()
                 ItemList:ScanBags()
             end
         elseif event == "BAG_UPDATE_DELAYED" then
-            if MainFrame:IsShown() and not InCombatLockdown() then
-                ItemList:ScanBags()
-            end
+            ItemList:OnBagUpdateDelayed()
         end
     end)
 end
