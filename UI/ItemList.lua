@@ -147,8 +147,14 @@ function ItemList:CreateDisenchantButton(parent)
     -- Configure as macro
     deButton:SetAttribute("type", "macro")
 
-    -- Refresh after click
-    deButton:HookScript("OnClick", function()
+    -- Disable immediately after click to prevent double-click equipping the item.
+    -- A second click would cancel the Disenchant cast, then /use runs without the
+    -- disenchant cursor and equips the item instead of disenchanting it.
+    -- UpdateDisenchantButton() re-enables the button once the rescan confirms the item is gone.
+    deButton:HookScript("OnClick", function(self)
+        if not InCombatLockdown() then
+            self:Disable()
+        end
         C_Timer.After(2, function()
             if addon.MainFrame:IsShown() and not InCombatLockdown() then
                 ItemList:ScanBags()
