@@ -334,7 +334,10 @@ function ItemList:UpdateDisenchantButton()
 
     if #disenchantList > 0 then
         local firstItem = disenchantList[1]
-        local macroText = "/cast " .. L.DISENCHANT_SPELL .. "\n/use " .. firstItem.bag .. " " .. firstItem.slot
+        -- The ! prevents /cast from cancelling an already-active Disenchant cursor.
+        -- Without it, a fast second click would cancel the cursor and /use would
+        -- run without it, equipping the item instead of disenchanting it.
+        local macroText = "/cast !" .. L.DISENCHANT_SPELL .. "\n/use " .. firstItem.bag .. " " .. firstItem.slot
         deButton:SetAttribute("macrotext", macroText)
         deButton.text:SetText(L.DISENCHANT)
         deButton:Enable()
