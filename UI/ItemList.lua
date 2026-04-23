@@ -108,6 +108,16 @@ function ItemList:CreateDisenchantButton(parent)
     htex:SetBlendMode("ADD")
     deButton:SetHighlightTexture(htex)
 
+    -- Cooldown overlay: WoW-style spinning animation shown after each click
+    -- to give clear visual feedback that the button is on cooldown.
+    local CLICK_COOLDOWN = 2 -- seconds before the button can be clicked again
+    local cooldown = CreateFrame("Cooldown", nil, deButton, "CooldownFrameTemplate")
+    cooldown:SetAllPoints()
+    cooldown:SetDrawEdge(true)
+    cooldown:SetDrawBling(false)
+    cooldown:SetHideCountdownNumbers(true)
+    deButton.cooldown = cooldown
+
     -- Button text
     deButton.text = deButton:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     deButton.text:SetPoint("CENTER")
@@ -169,15 +179,16 @@ function ItemList:CreateDisenchantButton(parent)
         end
     end)
 
-    -- Disable immediately after click to prevent double-click equipping the item.
-    -- A second click would cancel the Disenchant cast, then /use runs without the
-    -- disenchant cursor and equips the item instead of disenchanting it.
-    -- UpdateDisenchantButton() re-enables it once the rescan confirms the item is gone.
+    -- After each click: show the cooldown animation and disable the button for
+    -- CLICK_COOLDOWN seconds. This prevents spam-clicking from cancelling the
+    -- Disenchant cursor and accidentally equipping items.
+    -- UpdateDisenchantButton() will re-enable it after the rescan if items remain.
     deButton:HookScript("OnClick", function(self)
         if not InCombatLockdown() then
             self:Disable()
+            self.cooldown:SetCooldown(GetTime(), CLICK_COOLDOWN)
         end
-        C_Timer.After(2, function()
+        C_Timer.After(CLICK_COOLDOWN, function()
             if addon.MainFrame:IsShown() and not InCombatLockdown() then
                 ItemList:ScanBags()
             end
