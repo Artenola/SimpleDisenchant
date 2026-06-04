@@ -10,21 +10,20 @@ on:
       - 'chore/**'
 
 # Skip runs triggered by release-please bump commits on main.
-# Releases are now handled entirely by release-please.yml.
+# Releases are handled entirely by release-please.yml.
+# This workflow only BUILDS — publishing to CurseForge/Wago is manual
+# (see publish.yml) except for stable releases (release-please.yml).
 
 jobs:
   build:
-    name: Build & Publish
+    name: Build
     runs-on: ubuntu-latest
     # Skip bump commits from release-please on main
     if: "github.ref != 'refs/heads/main' || !startsWith(github.event.head_commit.message, 'chore: release')"
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: |
@@ -32,9 +31,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends subversion jq zip rsync
 
       # ──────────────────────────────────────────────
-      # Compute version and release type from TOC + ref
-      #   main          → beta  (auto-published)
-      #   other branches → alpha (build only, publish manually via publish.yml)
+      # Compute version from TOC + ref
+      #   main          → beta
+      #   other branches → alpha
       # ──────────────────────────────────────────────
       - name: Compute version and type
         id: info
@@ -59,24 +58,6 @@ jobs:
           sed -i "s/^## Version: .*/## Version: ${{ steps.info.outputs.version }}/" SimpleDisenchant.toc
 
       # ──────────────────────────────────────────────
-      # CHANGELOG extraction (for upload metadata)
-      # ──────────────────────────────────────────────
-      - name: Extract changelog section
-        id: changelog
-        run: |
-          VERSION="${{ steps.info.outputs.version }}"
-          BASE_VERSION="${VERSION%%-*}"
-          BODY=""
-          if grep -q "## \[$BASE_VERSION\]" CHANGELOG.md; then
-            BODY=$(sed -n "/^## \[$BASE_VERSION\]/,/^## \[/p" CHANGELOG.md | sed '$d')
-          fi
-          {
-            echo "body<<CHANGELOG_EOF"
-            echo "$BODY"
-            echo "CHANGELOG_EOF"
-          } >> "$GITHUB_OUTPUT"
-
-      # ──────────────────────────────────────────────
       # Build package (zip with externals)
       # ──────────────────────────────────────────────
       - name: Build package
@@ -86,7 +67,7 @@ jobs:
           VERSION: ${{ steps.info.outputs.version }}
 
       # ──────────────────────────────────────────────
-      # Save artifact (so alpha builds can be published manually later)
+      # Save artifact so it can be published manually later
       # ──────────────────────────────────────────────
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -94,21 +75,6 @@ jobs:
           name: ${{ steps.build.outputs.archive_name }}
           path: ${{ steps.build.outputs.archive }}
           retention-days: 30
-
-      # ──────────────────────────────────────────────
-      # Auto-publish beta to CurseForge & Wago (main only)
-      # alpha builds are NOT published here — use the Publish workflow.
-      # ──────────────────────────────────────────────
-      - name: Upload to CurseForge & Wago
-        if: steps.info.outputs.type == 'beta'
-        run: ./scripts/upload-package.sh
-        env:
-          ARCHIVE: ${{ steps.build.outputs.archive }}
-          VERSION: ${{ steps.info.outputs.version }}
-          RELEASE_TYPE: ${{ steps.info.outputs.type }}
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
-          CHANGELOG_BODY: ${{ steps.changelog.outputs.body }}
 
       # ──────────────────────────────────────────────
       # Summary
@@ -120,11 +86,5 @@ jobs:
             echo ""
             echo "**Archive:** \`${{ steps.build.outputs.archive_name }}\`"
             echo ""
-            if [[ "${{ steps.info.outputs.type }}" == "beta" ]]; then
-              echo "> ✅ Publié automatiquement en beta sur CurseForge & Wago."
-            else
-              echo "> ℹ️ Build alpha. Pour publier, lance le workflow **Publish** manuellement."
-            fi
-            echo ""
-            echo "${{ steps.changelog.outputs.body }}"
+            echo "> ℹ️ Pour publier sur CurseForge/Wago, lance le workflow **Publish** manuellement."
           } >> "$GITHUB_STEP_SUMMARY"
