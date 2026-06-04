@@ -1,4 +1,4 @@
-## Interface: 120000, 120001, 120005
+## Interface: 120000, 120001, 120005, 120007
 ## Title: Simple Disenchant
 ## Author: Artenola
 ## Version: 1.7.2 # x-release-please-version
