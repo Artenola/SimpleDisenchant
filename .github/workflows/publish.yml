@@ -1,26 +1,32 @@
-name: CI/CD
+name: Publish
 
+# Triggered manually from GitHub Actions → "Run workflow"
 on:
-  push:
-    branches:
-      - main
-      - 'feature/**'
-      - 'features/**'
-      - 'fix/**'
-      - 'chore/**'
-
-# Skip runs triggered by release-please bump commits on main.
-# Releases are now handled entirely by release-please.yml.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or commit to publish (ex: main, fix/mon-bug)'
+        required: true
+        default: 'main'
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'beta'
+        type: choice
+        options:
+          - alpha
+          - beta
 
 jobs:
-  build:
-    name: Build
+  publish:
+    name: Publish to CurseForge & Wago
     runs-on: ubuntu-latest
-    # Skip bump commits from release-please on main
-    if: "github.ref != 'refs/heads/main' || !startsWith(github.event.head_commit.message, 'chore: release')"
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.ref }}
           fetch-depth: 0
 
       - name: Install dependencies
@@ -29,29 +35,42 @@ jobs:
           sudo apt-get install -y --no-install-recommends subversion jq zip rsync
 
       # ──────────────────────────────────────────────
-      # Compute version from TOC + ref
+      # Compute version
       # ──────────────────────────────────────────────
       - name: Compute version
         id: info
         run: |
           TOC_VERSION=$(grep -oP '## Version:\s*\K[^\s#]+' SimpleDisenchant.toc)
           SHORT_SHA=$(git rev-parse --short HEAD)
-
-          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            VERSION="${TOC_VERSION}-beta-${SHORT_SHA}"
-          else
-            VERSION="${TOC_VERSION}-alpha-${SHORT_SHA}"
-          fi
+          VERSION="${TOC_VERSION}-${{ inputs.release_type }}-${SHORT_SHA}"
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "→ Version: $VERSION"
+          echo "→ Version: $VERSION (${{ inputs.release_type }})"
 
       - name: Set TOC version
         run: |
           sed -i "s/^## Version: .*/## Version: ${{ steps.info.outputs.version }}/" SimpleDisenchant.toc
 
       # ──────────────────────────────────────────────
-      # Build package (zip with externals)
+      # CHANGELOG extraction (for upload metadata)
+      # ──────────────────────────────────────────────
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          VERSION="${{ steps.info.outputs.version }}"
+          BASE_VERSION="${VERSION%%-*}"
+          BODY=""
+          if grep -q "## \[$BASE_VERSION\]" CHANGELOG.md; then
+            BODY=$(sed -n "/^## \[$BASE_VERSION\]/,/^## \[/p" CHANGELOG.md | sed '$d')
+          fi
+          {
+            echo "body<<CHANGELOG_EOF"
+            echo "$BODY"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # ──────────────────────────────────────────────
+      # Build package
       # ──────────────────────────────────────────────
       - name: Build package
         id: build
@@ -60,14 +79,17 @@ jobs:
           VERSION: ${{ steps.info.outputs.version }}
 
       # ──────────────────────────────────────────────
-      # Upload artifact for manual publish
+      # Upload to CurseForge & Wago
       # ──────────────────────────────────────────────
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.build.outputs.archive_name }}
-          path: ${{ steps.build.outputs.archive }}
-          retention-days: 30
+      - name: Upload to CurseForge & Wago
+        run: ./scripts/upload-package.sh
+        env:
+          ARCHIVE: ${{ steps.build.outputs.archive }}
+          VERSION: ${{ steps.info.outputs.version }}
+          RELEASE_TYPE: ${{ inputs.release_type }}
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+          CHANGELOG_BODY: ${{ steps.changelog.outputs.body }}
 
       # ──────────────────────────────────────────────
       # Summary
@@ -75,9 +97,10 @@ jobs:
       - name: Generate summary
         run: |
           {
-            echo "## ${{ steps.info.outputs.version }}"
+            echo "## ${{ steps.info.outputs.version }} (${{ inputs.release_type }})"
             echo ""
+            echo "**Ref:** \`${{ inputs.ref }}\`"
             echo "**Archive:** \`${{ steps.build.outputs.archive_name }}\`"
             echo ""
-            echo "> ℹ️ Pour publier sur CurseForge/Wago, utilise le workflow **Publish** manuellement."
+            echo "${{ steps.changelog.outputs.body }}"
           } >> "$GITHUB_STEP_SUMMARY"
