@@ -3,14 +3,14 @@ name: Lint
 on:
   pull_request:
     branches:
-      - develop
       - main
   push:
     branches:
-      - develop
       - main
       - 'feature/**'
       - 'features/**'
+      - 'fix/**'
+      - 'chore/**'
 
 jobs:
   luacheck:
