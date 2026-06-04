@@ -5,13 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Branch or commit to publish (ex: main, fix/mon-bug)'
+        description: 'Branch or commit to publish (ex: fix/mon-bug)'
         required: true
-        default: 'main'
+        default: ''
       release_type:
         description: 'Release type'
         required: true
-        default: 'beta'
+        default: 'alpha'
         type: choice
         options:
           - alpha
