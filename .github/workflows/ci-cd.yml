@@ -3,10 +3,11 @@ name: CI/CD
 on:
   push:
     branches:
-      - develop
       - main
       - 'feature/**'
       - 'features/**'
+      - 'fix/**'
+      - 'chore/**'
 
 # Skip runs triggered by release-please bump commits on main.
 # Releases are now handled entirely by release-please.yml.
@@ -43,10 +44,6 @@ jobs:
             SHORT_SHA=$(git rev-parse --short HEAD)
             VERSION="${TOC_VERSION}-beta-${SHORT_SHA}"
             TYPE="beta"
-          elif [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
-            SHORT_SHA=$(git rev-parse --short HEAD)
-            VERSION="${TOC_VERSION}-alpha-${SHORT_SHA}"
-            TYPE="alpha"
           else
             SHORT_SHA=$(git rev-parse --short HEAD)
             VERSION="${TOC_VERSION}-alpha-${SHORT_SHA}"
