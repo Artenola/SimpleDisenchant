@@ -2,6 +2,13 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.7.4](https://github.com/Artenola/SimpleDisenchant/compare/v1.7.3...v1.7.4) (2026-08-04)
+
+
+### Fixed
+
+* **interface:** update interface version for WoW 12.1.0 ([9b5df90](https://github.com/Artenola/SimpleDisenchant/commit/9b5df90a5216771d3cc5611c051f3ae3d1f5c2a7))
+
 ## [1.7.3](https://github.com/Artenola/SimpleDisenchant/compare/v1.7.2...v1.7.3) (2026-06-04)
 
 
