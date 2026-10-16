@@ -2,6 +2,13 @@
 
 All notable changes to SimpleDisenchant will be documented in this file.
 
+## [1.7.5](https://github.com/Artenola/SimpleDisenchant/compare/v1.7.4...v1.7.5) (2026-10-16)
+
+
+### Fixed
+
+* **interface:** bump TOC for WoW 12.1.5 ([c677fad](https://github.com/Artenola/SimpleDisenchant/commit/c677fad355c7661108f643322a8f0af11392d0f8))
+
 ## [1.7.4](https://github.com/Artenola/SimpleDisenchant/compare/v1.7.3...v1.7.4) (2026-08-04)
 
 
