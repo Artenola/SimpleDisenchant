@@ -17,6 +17,7 @@ ignore:
   - "*.jpeg"
   - "*.png"
   - "install.config.example"
+  - sonar-project.properties
   
 externals:
   Libs/LibStub:
